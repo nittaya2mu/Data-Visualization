@@ -1,0 +1,22 @@
+:root{
+  --bg:#0b0b0c; --fg:#eaeaf0; --muted:#b7b8c3; --accent:#7cd3ff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg);line-height:1.55}
+.site-header{padding:24px 16px 8px;max-width:1100px;margin:auto}
+.site-header h1{margin:0 0 4px;font-weight:800}
+.subtitle{margin:0;color:var(--muted)}
+.site-nav{display:flex;gap:16px;max-width:1100px;margin:0 auto;padding:8px 16px;border-top:1px solid #222;border-bottom:1px solid #222}
+.site-nav a{color:var(--fg);text-decoration:none;opacity:.9}
+main{max-width:1100px;margin:auto;padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.kpi{background:#16161a;border:1px solid #222;border-radius:14px;padding:16px}
+.kpi h2{margin:4px 0 2px;color:var(--muted);font-weight:600}
+.kpi-value{font-size:2rem;font-weight:800;margin:0}
+.kpi-note{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+.chart{background:#111;border:1px solid #222;border-radius:14px;padding:16px;margin:12px 0}
+.placeholder{display:grid;place-items:center;height:220px;border:2px dashed #2a2a33;border-radius:10px;color:#9aa}
+.insights{background:#16161a;border:1px solid #222;border-radius:14px;padding:16px}
+.note{max-width:1100px;margin:0 auto 16px;color:#9aa;padding:0 16px}
+.site-footer{padding:16px;color:#8c8ea1;text-align:center}
+@media (max-width:768px){.kpis{grid-template-columns:1fr}}

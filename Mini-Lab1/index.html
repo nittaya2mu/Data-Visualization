@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini‑Lab Class 1 — Semantic Layout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Retail Dashboard — 2024</h1>
+    <p class="subtitle">Single focus: What month leads and how stable is demand?</p>
+  </header>
+
+  <nav class="site-nav" aria-label="Primary">
+    <a href="#kpis">KPIs</a>
+    <a href="#chart">Chart</a>
+    <a href="#insights">Insights</a>
+  </nav>
+
+  <main id="main-content">
+    <section id="kpis" class="kpis" aria-label="Key performance indicators">
+      <article class="kpi">
+        <h2>Total Sales</h2>
+        <p class="kpi-value">฿4.2M</p>
+        <p class="kpi-note">Jan–Oct</p>
+      </article>
+      <article class="kpi">
+        <h2>Best Month</h2>
+        <p class="kpi-value">August</p>
+        <p class="kpi-note">Peak season</p>
+      </article>
+      <article class="kpi">
+        <h2>MoM Change</h2>
+        <p class="kpi-value">+6.4%</p>
+        <p class="kpi-note">vs last month</p>
+      </article>
+    </section>
+
+    <section id="chart" class="chart">
+      <h2>Chart Placeholder</h2>
+      <div class="placeholder" role="img" aria-label="Bar chart placeholder for monthly sales">
+        Chart coming next class (SVG)
+      </div>
+    </section>
+
+    <section id="insights" class="insights">
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Seasonality: Aug outperforms Q1.</li>
+        <li>Stock buffer +5–8% in Q3.</li>
+        <li>Plan promo during school holidays.</li>
+      </ul>
+    </section>
+  </main>
+
+  <aside class="note">
+    <p>Note: This page uses HTML5 semantic tags and mobile‑first CSS.</p>
+  </aside>
+
+  <footer class="site-footer">
+    <small>© 2025 Mini‑Lab Class 1 • Accessible • Mobile‑first</small>
+  </footer>
+</body>
+</html>

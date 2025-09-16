@@ -1,0 +1,22 @@
+:root{
+  --bg:#0b0b0c; --fg:#eaeaf0; --muted:#b7b8c3; --accent:#7cd3ff; --peak:#ffd166;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg);line-height:1.55}
+.site-header{padding:24px 16px 8px;max-width:1100px;margin:auto}
+.site-header h1{margin:0 0 4px;font-weight:800}
+.subtitle{margin:0;color:var(--muted)}
+main{max-width:1100px;margin:auto;padding:16px}
+.chart{background:#111;border:1px solid #222;border-radius:14px;padding:16px;margin:12px 0}
+.barchart{width:100%;height:auto}
+.axis{stroke:#3a3b45;stroke-width:2}
+.ticks text{fill:#8c8ea1;font-size:12px}
+.bars rect{fill:var(--accent);rx:6}
+.bars text{fill:#8c8ea1;font-size:12px;text-anchor:middle}
+.bar-peak{fill:var(--peak)}
+.caption{color:var(--muted);margin-top:.5rem}
+.legend text{fill:#c9c9d6;font-size:12px}
+.legend-box{fill:#15161a;stroke:#2a2a33;stroke-width:1}
+.annot-line{stroke:#c9c9d6;stroke-dasharray:4 4}
+.annot-text{fill:#eaeaf0;font-size:13px}
+.site-footer{padding:16px;color:#8c8ea1;text-align:center}

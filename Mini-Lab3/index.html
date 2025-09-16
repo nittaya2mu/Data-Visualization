@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini‑Lab Class 3 — Storytelling & Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Retail Dashboard — Narrative Delivery</h1>
+    <p class="subtitle">From question → data → insight → action</p>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Main Question</h2>
+      <p>Which month drives the highest sales, and what implications for Q3 planning?</p>
+    </section>
+
+    <section class="kpis" aria-label="Key performance indicators">
+      <article class="kpi">
+        <h3>Total 2024</h3>
+        <p class="kpi-value">฿5.0M</p>
+      </article>
+      <article class="kpi">
+        <h3>Peak Month</h3>
+        <p class="kpi-value">August</p>
+      </article>
+      <article class="kpi">
+        <h3>Volatility</h3>
+        <p class="kpi-value">Moderate</p>
+      </article>
+    </section>
+
+    <section class="chart" aria-labelledby="chart-title">
+      <h2 id="chart-title">Monthly Sales (SVG)</h2>
+      <figure role="img" aria-labelledby="fig-title fig-desc">
+        <svg class="barchart" viewBox="0 0 720 420" preserveAspectRatio="xMidYMid meet">
+          <title id="fig-title">Monthly sales with highlighted peak</title>
+          <desc id="fig-desc">Bars represent monthly sales; the highest month is highlighted. Caption below summarizes the pattern.</desc>
+
+          <!-- axes -->
+          <line x1="70" y1="350" x2="680" y2="350" class="axis"/>
+          <line x1="70" y1="50"  x2="70"  y2="350" class="axis"/>
+
+          <!-- bars (reuse class 2 values for consistency) -->
+          <g class="bars">
+            <g transform="translate(90,0)"><rect width="36" y="310" height="40" class="bar"/><text x="18" y="380">Jan</text></g>
+            <g transform="translate(150,0)"><rect width="36" y="300" height="50" class="bar"/><text x="18" y="380">Feb</text></g>
+            <g transform="translate(210,0)"><rect width="36" y="275" height="75" class="bar"/><text x="18" y="380">Mar</text></g>
+            <g transform="translate(270,0)"><rect width="36" y="260" height="90" class="bar"/><text x="18" y="380">Apr</text></g>
+            <g transform="translate(330,0)"><rect width="36" y="290" height="60" class="bar"/><text x="18" y="380">May</text></g>
+            <g transform="translate(390,0)"><rect width="36" y="300" height="50" class="bar"/><text x="18" y="380">Jun</text></g>
+            <g transform="translate(450,0)"><rect width="36" y="270" height="80" class="bar"/><text x="18" y="380">Jul</text></g>
+            <g transform="translate(510,0)"><rect width="36" y="245" height="105" class="bar-peak"/><text x="18" y="380">Aug</text></g>
+            <g transform="translate(570,0)"><rect width="36" y="275" height="75" class="bar"/><text x="18" y="380">Sep</text></g>
+            <g transform="translate(630,0)"><rect width="36" y="290" height="60" class="bar"/><text x="18" y="380">Oct</text></g>
+            <g transform="translate(690,0)"><rect width="36" y="300" height="50" class="bar"/><text x="18" y="380">Nov</text></g>
+            <g transform="translate(750,0)"><rect width="36" y="285" height="65" class="bar"/><text x="18" y="380">Dec</text></g>
+          </g>
+        </svg>
+        <figcaption class="caption">Peak in <strong>August</strong>. Consider inventory buffers and promo planning in Q3.</figcaption>
+      </figure>
+    </section>
+
+    <section class="insights">
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Aug is the clear peak; July–Sep consistently above Q1.</li>
+        <li>Maintain +5–8% stock buffer in Q3.</li>
+        <li>Test discount elasticity before mid‑July.</li>
+      </ul>
+    </section>
+
+    <section class="qa">
+      <h2>QA & Delivery Checklist</h2>
+      <ul>
+        <li>Accessibility: Contrast AA; keyboard focus visible; <code>role</code> + <code>aria-labelledby</code>.</li>
+        <li>Performance: Font weights trimmed; images scaled; CSS minified.</li>
+        <li>Responsive: Looks good at 360 / 768 / 1280 px.</li>
+        <li>Microcopy: short, neutral, action‑oriented.</li>
+      </ul>
+    </section>
+
+    <section class="ai-log">
+      <h2>AI Usage Log (example)</h2>
+      <ol>
+        <li>Prompt: “Summarize 12‑month sales into 3 bullets.” → Edited wording.</li>
+        <li>Prompt: “Suggest high‑contrast palette for dark UI.” → Adjusted accent for WCAG AA.</li>
+        <li>Prompt: “Review HTML/CSS for responsiveness.” → Applied 2 grid tweaks.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>© 2025 Mini‑Lab Class 3 • Storytelling • QA</small>
+  </footer>
+</body>
+</html>
