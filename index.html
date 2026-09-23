@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เฉลย Mini-Lab 1–3: Data Visualization ด้วย HTML5, CSS & SVG</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-light: #ffffff;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dark: #0f172a;
+      --primary: #2563eb;
+      --primary-light: #38bdf8;
+      --accent-peak: #f59e0b;
+      --accent-green: #10b981;
+      --border-color: #334155;
+      --border-light: #e2e8f0;
+      --font-family: 'Prompt', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+    /* Header */
+    .solution-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.2);
+      color: var(--primary-light);
+      border: 1px solid var(--primary);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .solution-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .solution-header p {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Page Link Buttons in Header */
+    .external-links {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .page-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--primary-light);
+      border: 1px solid var(--primary-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .page-link-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Tab Navigation */
+    .nav-container {
+      max-width: 1200px;
+      margin: 24px auto 0 auto;
+      padding: 0 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-family: var(--font-family);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: #273549;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Content Layout */
+    .container {
+      max-width: 1200px;
+      margin: 24px auto 0 auto;
+      padding: 0 24px;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .section-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title i {
+      color: var(--primary-light);
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      font-family: var(--font-code);
+      font-size: 13.5px;
+      color: #e2e8f0;
+      overflow-x: auto;
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+    .code-keyword { color: #38bdf8; }
+    .code-tag { color: #f43f5e; }
+    .code-attr { color: #fbbf24; }
+    .code-string { color: #34d399; }
+    .code-comment { color: #64748b; font-style: italic; }
+
+    /* Live Output Preview Box */
+    .preview-box {
+      background: #ffffff;
+      color: var(--text-dark);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Dashboard Preview Styles */
+    .dash-header {
+      border-bottom: 2px solid var(--border-light);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .dash-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .dash-header p {
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    /* KPI Grid */
+    .kpi-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 768px) {
+      .kpi-container { flex-direction: row; }
+    }
+    .kpi-card {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.2s ease;
+    }
+    .kpi-card:hover { transform: translateY(-2px); }
+    .kpi-card.highlight {
+      border-left: 4px solid var(--accent-peak);
+      background: #fffbebf5;
+    }
+    .kpi-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-card .value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .kpi-card .sub-text {
+      font-size: 13px;
+      color: #10b981;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    /* Chart Section */
+    .chart-section {
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .chart-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* SVG Styling */
+    svg.bar-chart {
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+    .bar { fill: var(--primary); transition: fill 0.2s ease; }
+    .bar:hover { fill: #1d4ed8; }
+    .bar-peak { fill: var(--accent-peak); }
+    .bar-peak:hover { fill: #d97706; }
+    .axis-line { stroke: #cbd5e1; stroke-width: 1.5; }
+    .axis-label { font-size: 11px; fill: #64748b; font-family: var(--font-family); text-anchor: middle; }
+    .value-label { font-size: 10px; fill: #334155; font-weight: 600; text-anchor: middle; }
+
+    /* Insights & Table */
+    .insights-aside {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 24px;
+    }
+    .insights-aside h4 {
+      font-size: 16px;
+      color: #1e40af;
+      margin-bottom: 6px;
+    }
+    .insights-aside ul {
+      padding-left: 20px;
+      color: #1e3a8a;
+      font-size: 14px;
+    }
+
+    /* Table Styling */
+    .data-table-wrapper { overflow-x: auto; margin-top: 16px; }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+    table.data-table caption {
+      caption-side: top;
+      text-align: left;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    table.data-table th, table.data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    table.data-table th { background-color: #f1f5f9; color: #334155; font-weight: 600; }
+    table.data-table tr.highlight-row { background-color: #fef3c7; font-weight: 600; }
+
+    /* Checklist & AI Logs */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .check-icon { color: var(--accent-green); font-size: 18px; margin-top: 2px; }
+    .prompt-box {
+      background: #090d16;
+      border-left: 3px solid var(--primary-light);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-family: var(--font-code);
+      font-size: 13px;
+      color: #38bdf8;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with Page Links -->
+  <header class="solution-header">
+    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> เฉลยใบปฏิบัติการ Chapter 6</span>
+    <h1>Solution Key: Data Visualization ด้วย HTML5 & SVG</h1>
+    <p>รวมชุดคำสั่งเฉลยสมบูรณ์สำหรับ Mini-Lab 1, Mini-Lab 2 และ Mini-Lab 3 พร้อมตัวอย่างการแสดงผลและลิงก์ไปยังไฟล์จริง</p>
+    
+    <!-- Direct Links to Sub-pages -->
+    <div class="external-links">
+      <a href="minilab1.html" target="_blank" class="page-link-btn">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> เปิด minilab1.html (หน้าเต็ม)
+      </a>
+      <a href="minilab2.html" target="_blank" class="page-link-btn">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> เปิด minilab2.html (หน้าเต็ม)
+      </a>
+      <a href="minilab3.html" target="_blank" class="page-link-btn">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> เปิด minilab3.html (หน้าเต็ม)
+      </a>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-container" aria-label="Lab Selection">
+    <button class="tab-btn active" onclick="switchTab('all-demo')">
+      <i class="fa-solid fa-desktop"></i> Live Dashboard Demo
+    </button>
+    <button class="tab-btn" onclick="switchTab('lab1')">
+      <i class="fa-solid fa-code"></i> เฉลย Mini-Lab 1 (HTML5 & Layout)
+    </button>
+    <button class="tab-btn" onclick="switchTab('lab2')">
+      <i class="fa-solid fa-chart-column"></i> เฉลย Mini-Lab 2 (SVG Chart)
+    </button>
+    <button class="tab-btn" onclick="switchTab('lab3')">
+      <i class="fa-solid fa-list-check"></i> เฉลย Mini-Lab 3 (Story, QA & AI)
+    </button>
+  </nav>
+
+  <main class="container">
+    <!-- TAB 1: Complete Live Demo -->
+    <div id="all-demo" class="tab-content active">
+      <div class="section-card">
+        <div class="section-title-bar">
+          <div class="section-title">
+            <i class="fa-solid fa-circle-play"></i> หน้า Dashboard สมบูรณ์ (ผลลัพธ์จากการรวม Mini-Lab 1–3)
+          </div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 12px;">
+          ผลลัพธ์การรวมชุดคำสั่ง HTML5, CSS Flexbox, SVG Vector Chart และ Accessible Data Table
+        </p>
+
+        <!-- LIVE PREVIEW BOX -->
+        <div class="preview-box">
+          <header class="dash-header">
+            <h2>E-Commerce Sales Performance Dashboard 2026</h2>
+            <p>รายงานสรุปประสิทธิภาพยอดขายรายเดือน ปี 2026 | ข้อมูลอัปเดต ณ สิงหาคม 2026</p>
+          </header>
+
+          <main>
+            <!-- KPI Section (Mini-Lab 1 Solution) -->
+            <section class="kpi-container" aria-label="Key Performance Indicators">
+              <article class="kpi-card">
+                <h3>ยอดขายรวมทั้งหมด (Total Revenue)</h3>
+                <div class="value">4,250,000 ฿</div>
+                <div class="sub-text"><i class="fa-solid fa-arrow-trend-up"></i> +18.5% YoY</div>
+              </article>
+              <article class="kpi-card highlight">
+                <h3>เดือนที่ยอดขายสูงสุด (Peak Month)</h3>
+                <div class="value" style="color: #d97706;">580,000 ฿</div>
+                <div class="sub-text" style="color: #b45309;"><i class="fa-solid fa-crown"></i> เดือนสิงหาคม (Aug)</div>
+              </article>
+              <article class="kpi-card">
+                <h3>ยอดขายเฉลี่ยรายเดือน (Avg Monthly)</h3>
+                <div class="value">354,166 ฿</div>
+                <div class="sub-text" style="color: #64748b;">เป้าหมาย 300,000 ฿/เดือน</div>
+              </article>
+            </section>
+
+            <!-- SVG Chart Section (Mini-Lab 2 Solution) -->
+            <section class="chart-section" aria-labelledby="chart-heading">
+              <div class="chart-header">
+                <h3 id="chart-heading">ยอดขายรายเดือน Q1–Q4 (Monthly Revenue Trend)</h3>
+                <span style="font-size: 12px; background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                  SVG Chart
+                </span>
+              </div>
+
+              <!-- SVG Vector Graph -->
+              <svg class="bar-chart" viewBox="0 0 680 230" role="img" aria-labelledby="svg-title svg-desc">
+                <title id="svg-title">กราฟแท่งแสดงยอดขายรายเดือน ปี 2026</title>
+                <desc id="svg-desc">กราฟแท่งแสดงข้อมูลยอดขาย 12 เดือน ยอดขายรวม 4.25 ล้านบาท โดยมียอดขายสูงสุดในเดือนสิงหาคม 580,000 บาท และต่ำสุดในเดือนธันวาคม 80,000 บาท</desc>
+                
+                <line x1="40" y1="180" x2="660" y2="180" class="axis-line" />
+                <line x1="40" y1="40" x2="660" y2="40" stroke="#f1f5f9" stroke-dasharray="4" />
+                <text x="32" y="44" class="axis-label" style="text-anchor: end;">600k</text>
+                
+                <line x1="40" y1="110" x2="660" y2="110" stroke="#f1f5f9" stroke-dasharray="4" />
+                <text x="32" y="114" class="axis-label" style="text-anchor: end;">300k</text>
+
+                <!-- Bars (Jan - Dec) -->
+                <rect x="50" y="122" width="36" height="58" class="bar" rx="3" />
+                <text x="68" y="116" class="value-label">250k</text>
+                <text x="68" y="198" class="axis-label">Jan</text>
+
+                <rect x="100" y="108" width="36" height="72" class="bar" rx="3" />
+                <text x="118" y="102" class="value-label">310k</text>
+                <text x="118" y="198" class="axis-label">Feb</text>
+
+                <rect x="150" y="115" width="36" height="65" class="bar" rx="3" />
+                <text x="168" y="109" class="value-label">280k</text>
+                <text x="168" y="198" class="axis-label">Mar</text>
+
+                <rect x="200" y="82" width="36" height="98" class="bar" rx="3" />
+                <text x="218" y="76" class="value-label">420k</text>
+                <text x="218" y="198" class="axis-label">Apr</text>
+
+                <rect x="250" y="89" width="36" height="91" class="bar" rx="3" />
+                <text x="268" y="83" class="value-label">390k</text>
+                <text x="268" y="198" class="axis-label">May</text>
+
+                <rect x="300" y="61" width="36" height="119" class="bar" rx="3" />
+                <text x="318" y="55" class="value-label">510k</text>
+                <text x="318" y="198" class="axis-label">Jun</text>
+
+                <rect x="350" y="68" width="36" height="112" class="bar" rx="3" />
+                <text x="368" y="62" class="value-label">480k</text>
+                <text x="368" y="198" class="axis-label">Jul</text>
+
+                <!-- Peak Month Highlight -->
+                <rect x="400" y="45" width="36" height="135" class="bar-peak" rx="3" />
+                <text x="418" y="38" class="value-label" style="fill: #b45309; font-weight: 700;">580k ★</text>
+                <text x="418" y="198" class="axis-label" style="fill: #b45309; font-weight: 700;">Aug</text>
+
+                <rect x="450" y="73" width="36" height="107" class="bar" rx="3" />
+                <text x="468" y="67" class="value-label">460k</text>
+                <text x="468" y="198" class="axis-label">Sep</text>
+
+                <rect x="500" y="105" width="36" height="75" class="bar" rx="3" />
+                <text x="518" y="99" class="value-label">320k</text>
+                <text x="518" y="198" class="axis-label">Oct</text>
+
+                <rect x="550" y="138" width="36" height="42" class="bar" rx="3" />
+                <text x="568" y="132" class="value-label">180k</text>
+                <text x="568" y="198" class="axis-label">Nov</text>
+
+                <rect x="600" y="161" width="36" height="19" class="bar" rx="3" />
+                <text x="618" y="155" class="value-label">80k</text>
+                <text x="618" y="198" class="axis-label">Dec</text>
+              </svg>
+            </section>
+
+            <!-- Insight Panel (Mini-Lab 3 Storytelling Solution) -->
+            <aside class="insights-aside">
+              <h4><i class="fa-solid fa-lightbulb"></i> ข้อสรุปเชิงวิเคราะห์ (Key Data Takeaways)</h4>
+              <ul>
+                <li><b>จุดเติบโตสูงสุด (Peak):</b> ยอดขายพุ่งสูงที่สุดในเดือนสิงหาคม (580,000 บาท) จากแคมเปญ Mid-Year Sale</li>
+                <li><b>แนวโน้มชะลอตัว (Anomaly):</b> ยอดขายลดลงอย่างรวดเร็วใน Q4 โดยเฉพาะเดือนธันวาคม (80,000 บาท) เนื่องจากกระบวนการปรับปรุงระบบชำระเงิน</li>
+                <li><b>ข้อเสนอแนะ:</b> ควรเร่งทำโปรโมชันกระตุ้นยอดขายช่วง Q4 และกระจายงบการตลาดไม่ให้กระจุกตัวเฉพาะ Q3</li>
+              </ul>
+            </aside>
+
+            <!-- HTML Data Table Solution -->
+            <section class="data-table-wrapper">
+              <table class="data-table">
+                <caption>ตารางสรุปยอดขายรายไตรมาส (Quarterly Sales Data Table)</caption>
+                <thead>
+                  <tr>
+                    <th>ไตรมาส (Quarter)</th>
+                    <th>ยอดขายรวม (บาท)</th>
+                    <th>สัดส่วน (%)</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Q1 (ม.ค. - มี.ค.)</td>
+                    <td>840,000 ฿</td>
+                    <td>19.8%</td>
+                    <td>ตามเป้าหมาย</td>
+                  </tr>
+                  <tr>
+                    <td>Q2 (เม.ย. - มิ.ย.)</td>
+                    <td>1,320,000 ฿</td>
+                    <td>31.0%</td>
+                    <td>เติบโตต่อเนื่อง</td>
+                  </tr>
+                  <tr class="highlight-row">
+                    <td>Q3 (ก.ค. - ก.ย.) ★ Peak</td>
+                    <td>1,620,000 ฿</td>
+                    <td>38.1%</td>
+                    <td>สูงกว่าเป้าหมาย</td>
+                  </tr>
+                  <tr>
+                    <td>Q4 (ต.ค. - ธ.ค.)</td>
+                    <td>580,000 ฿</td>
+                    <td>11.1%</td>
+                    <td>ต้องปรับปรุง</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </main>
+
+          <footer style="margin-top: 24px; border-top: 1px solid var(--border-light); padding-top: 12px; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between;">
+            <span>ที่มาข้อมูล: E-Commerce Data Analytics Platform</span>
+            <span>WCAG AA & Lighthouse Verified</span>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Mini-Lab 1 Code & Link -->
+    <div id="lab1" class="tab-content">
+      <div class="section-card">
+        <div class="section-title-bar">
+          <div class="section-title">
+            <i class="fa-solid fa-code"></i> เฉลย Mini-Lab 1: HTML5 Semantic Structure & Responsive Layout
+          </div>
+          <a href="minilab1.html" target="_blank" class="page-link-btn">
+            <i class="fa-solid fa-up-right-from-square"></i> เปิดไฟล์ minilab1.html
+          </a>
+        </div>
+        <p style="color: var(--text-muted); font-size: 15px;">
+          โจทย์ให้ตั้งโครงสร้าง Semantic Web สำหรับ Dashboard และสร้าง KPI Cards ด้วย CSS Flexbox ที่รองรับ Mobile-first
+        </p>
+
+        <h4 style="color: var(--primary-light); margin-top: 20px;">1. โครงสร้าง HTML5 Semantic (index.html)</h4>
+        <div class="code-wrapper">
+          <span class="code-comment">&lt;!-- HTML5 Semantic Elements สำหรับ Data Dashboard --&gt;</span><br>
+          &lt;<span class="code-tag">header</span>&gt;<br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">h1</span>&gt;E-Commerce Sales Performance Dashboard 2026&lt;/<span class="code-tag">h1</span>&gt;<br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">p</span>&gt;รายงานสรุปประสิทธิภาพยอดขายรายเดือน ปี 2026&lt;/<span class="code-tag">p</span>&gt;<br>
+          &lt;/<span class="code-tag">header</span>&gt;<br><br>
+          &lt;<span class="code-tag">main</span>&gt;<br>
+          &nbsp;&nbsp;<span class="code-comment">&lt;!-- ส่วนแสดงผล KPI Cards --&gt;</span><br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">section</span> <span class="code-attr">class</span>=<span class="code-string">"kpi-container"</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-tag">article</span> <span class="code-attr">class</span>=<span class="code-string">"kpi-card"</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-tag">h3</span>&gt;ยอดขายรวมทั้งหมด&lt;/<span class="code-tag">h3</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-tag">p</span> <span class="code-attr">class</span>=<span class="code-string">"value"</span>&gt;4,250,000 ฿&lt;/<span class="code-tag">p</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;/<span class="code-tag">article</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-tag">article</span> <span class="code-attr">class</span>=<span class="code-string">"kpi-card highlight"</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-tag">h3</span>&gt;เดือนที่ยอดขายสูงสุด&lt;/<span class="code-tag">h3</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-tag">p</span> <span class="code-attr">class</span>=<span class="code-string">"value"</span>&gt;580,000 ฿ (Aug)&lt;/<span class="code-tag">p</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;/<span class="code-tag">article</span>&gt;<br>
+          &nbsp;&nbsp;&lt;/<span class="code-tag">section</span>&gt;<br>
+          &lt;/<span class="code-tag">main</span>&gt;
+        </div>
+
+        <h4 style="color: var(--primary-light); margin-top: 20px;">2. ชุดคำสั่ง CSS Mobile-first Layout (styles.css)</h4>
+        <div class="code-wrapper">
+          <span class="code-comment">/* Mobile-first Layout (ค่าเริ่มต้นสำหรับจอเล็ก &lt; 768px) */</span><br>
+          <span class="code-keyword">.kpi-container</span> {<br>
+          &nbsp;&nbsp;<span class="code-attr">display</span>: flex;<br>
+          &nbsp;&nbsp;<span class="code-attr">flex-direction</span>: column; <span class="code-comment">/* เรียงต่อกันแนวตั้งบนมือถือ */</span><br>
+          &nbsp;&nbsp;<span class="code-attr">gap</span>: 16px;<br>
+          }<br><br>
+          <span class="code-comment">/* Responsive Breakpoint สำหรับ Tablet/Desktop (≥ 768px) */</span><br>
+          <span class="code-keyword">@media</span> (min-width: 768px) {<br>
+          &nbsp;&nbsp;<span class="code-keyword">.kpi-container</span> {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-attr">flex-direction</span>: row; <span class="code-comment">/* ขยายเป็นแนวนอนเรียงคอลัมน์บนจอใหญ่ */</span><br>
+          &nbsp;&nbsp;}<br>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Mini-Lab 2 Code & Link -->
+    <div id="lab2" class="tab-content">
+      <div class="section-card">
+        <div class="section-title-bar">
+          <div class="section-title">
+            <i class="fa-solid fa-chart-column"></i> เฉลย Mini-Lab 2: SVG Bar Chart & Accessibility (ARIA)
+          </div>
+          <a href="minilab2.html" target="_blank" class="page-link-btn">
+            <i class="fa-solid fa-up-right-from-square"></i> เปิดไฟล์ minilab2.html
+          </a>
+        </div>
+        <p style="color: var(--text-muted); font-size: 15px;">
+          โจทย์ให้สร้าง SVG Bar Chart ยอดขาย 12 เดือน ปรับสเกลแท่งกราฟ ไฮไลต์จุด Peak ส.ค. และใส่ ARIA Accessibility
+        </p>
+
+        <div class="code-wrapper">
+          <span class="code-comment">&lt;!-- SVG Bar Chart พร้อม ARIA สำหรับ Screen Reader --&gt;</span><br>
+          &lt;<span class="code-tag">svg</span> <span class="code-attr">viewBox</span>=<span class="code-string">"0 0 680 230"</span> <span class="code-attr">role</span>=<span class="code-string">"img"</span> <span class="code-attr">aria-labelledby</span>=<span class="code-string">"svg-title svg-desc"</span>&gt;<br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">title</span> <span class="code-attr">id</span>=<span class="code-string">"svg-title"</span>&gt;กราฟแท่งแสดงยอดขายรายเดือน ปี 2026&lt;/<span class="code-tag">title</span>&gt;<br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">desc</span> <span class="code-attr">id</span>=<span class="code-string">"svg-desc"</span>&gt;ยอดขายรวม 4.25 ล้านบาท สูงสุดสิงหาคม 580,000 บาท&lt;/<span class="code-tag">desc</span>&gt;<br><br>
+          &nbsp;&nbsp;<span class="code-comment">&lt;!-- แกน Baseline X --&gt;</span><br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">line</span> <span class="code-attr">x1</span>=<span class="code-string">"40"</span> <span class="code-attr">y1</span>=<span class="code-string">"180"</span> <span class="code-attr">x2</span>=<span class="code-string">"660"</span> <span class="code-attr">y2</span>=<span class="code-string">"180"</span> <span class="code-attr">stroke</span>=<span class="code-string">"#cbd5e1"</span> /&gt;<br><br>
+          &nbsp;&nbsp;<span class="code-comment">&lt;!-- แท่งยอดขายปกติ (ม.ค. 250k) --&gt;</span><br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">rect</span> <span class="code-attr">x</span>=<span class="code-string">"50"</span> <span class="code-attr">y</span>=<span class="code-string">"122"</span> <span class="code-attr">width</span>=<span class="code-string">"36"</span> <span class="code-attr">height</span>=<span class="code-string">"58"</span> <span class="code-attr">fill</span>=<span class="code-string">"#2563eb"</span> /&gt;<br><br>
+          &nbsp;&nbsp;<span class="code-comment">&lt;!-- แท่ง Peak ยอดขายสูงสุด (ส.ค. 580k Highlight สีส้ม #f59e0b) --&gt;</span><br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">rect</span> <span class="code-attr">x</span>=<span class="code-string">"400"</span> <span class="code-attr">y</span>=<span class="code-string">"45"</span> <span class="code-attr">width</span>=<span class="code-string">"36"</span> <span class="code-attr">height</span>=<span class="code-string">"135"</span> <span class="code-attr">fill</span>=<span class="code-string">"#f59e0b"</span> /&gt;<br>
+          &nbsp;&nbsp;&lt;<span class="code-tag">text</span> <span class="code-attr">x</span>=<span class="code-string">"418"</span> <span class="code-attr">y</span>=<span class="code-string">"38"</span> <span class="code-attr">fill</span>=<span class="code-string">"#b45309"</span> <span class="code-attr">font-weight</span>=<span class="code-string">"bold"</span>&gt;580k ★&lt;/<span class="code-tag">text</span>&gt;<br>
+          &lt;/<span class="code-tag">svg</span>&gt;
+        </div>
+
+        <div style="background: #1e293b; border-radius: 10px; padding: 18px; margin-top: 16px;">
+          <h4 style="color: var(--accent-peak); margin-bottom: 8px;">สูตรการคำนวณตำแหน่ง SVG Rectangle:</h4>
+          <p style="font-size: 14px; color: var(--text-muted);">
+            • ความสูงแท่ง (height) = <code>(ยอดขายเดือนนั้น / ยอดขายสูงสุด 600,000) * 140px</code><br>
+            • พิกัดแนวตั้ง (y) = <code>Baseline(180) - height</code>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Mini-Lab 3 Code & Link -->
+    <div id="lab3" class="tab-content">
+      <div class="section-card">
+        <div class="section-title-bar">
+          <div class="section-title">
+            <i class="fa-solid fa-list-check"></i> เฉลย Mini-Lab 3: Data Storytelling, QA & AI Logs
+          </div>
+          <a href="minilab3.html" target="_blank" class="page-link-btn">
+            <i class="fa-solid fa-up-right-from-square"></i> เปิดไฟล์ minilab3.html
+          </a>
+        </div>
+
+        <h4 style="color: var(--primary-light); margin-bottom: 12px;">1. รายการตรวจสอบ QA & Ethics Checklist</h4>
+        <div>
+          <div class="checklist-item">
+            <i class="fa-solid fa-circle-check check-icon"></i>
+            <div>
+              <b style="color: #ffffff;">Lighthouse Audit Passed (≥ 80):</b>
+              <p style="font-size: 14px; color: var(--text-muted);">โครงสร้าง HTML5 Semantic และภาพ SVG ช่วยให้ได้คะแนน Performance 95+ และ Accessibility 100</p>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <i class="fa-solid fa-circle-check check-icon"></i>
+            <div>
+              <b style="color: #ffffff;">Contrast Ratio & Color-blind Safe:</b>
+              <p style="font-size: 14px; color: var(--text-muted);">ใช้สีฟ้าเข้ม (#2563eb) และส้ม (#f59e0b) บนพื้นหลังขาว มีค่า Contrast Ratio ≥ 4.5:1 ตามมาตรฐาน WCAG AA</p>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <i class="fa-solid fa-circle-check check-icon"></i>
+            <div>
+              <b style="color: #ffffff;">Data Ethics (Unbiased Axis):</b>
+              <p style="font-size: 14px; color: var(--text-muted);">เริ่มต้นแกน Y จาก 0 เสมอ ไม่ตัดทอนแกน (Truncated Axis) เพื่อป้องกันการตีความข้อมูลคลาดเคลื่อน</p>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="color: var(--primary-light); margin-top: 24px; margin-bottom: 12px;">2. AI Prompt Logs ตัวอย่างที่ใช้นำเสนอใน Lab</h4>
+        <div class="prompt-box">
+          <b>Prompt 1 (HTML5 Structure):</b><br>
+          "Generate HTML5 semantic layout for e-commerce sales dashboard including header, kpi section, svg chart section, and footer with WCAG AA accessibility."
+        </div>
+        <div class="prompt-box">
+          <b>Prompt 2 (SVG Generation):</b><br>
+          "Create clean raw SVG bar chart code for 12 monthly revenue values [250, 310, 280, 420, 390, 510, 480, 580, 460, 320, 180, 80]. Highlight the peak month (580k) with amber color and include ARIA labels."
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- JavaScript for Tab Navigation -->
+  <script>
+    function switchTab(tabId) {
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(content => content.classList.remove('active'));
+
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+
+      const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

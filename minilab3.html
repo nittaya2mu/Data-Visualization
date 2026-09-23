@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini-Lab 3: Storytelling, QA & Data Table</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --accent-green: #10b981;
+      --border-color: #e2e8f0;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      padding: 24px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    h1 { font-size: 22px; margin-bottom: 16px; }
+    h2 { font-size: 18px; margin-bottom: 12px; color: var(--primary); }
+    
+    /* Data Story Insight Box */
+    .insights-aside {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+    }
+    .insights-aside ul { padding-left: 20px; font-size: 14px; }
+    
+    /* Data Table */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    table.data-table caption {
+      text-align: left;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    table.data-table th, table.data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+    table.data-table th { background: #f1f5f9; }
+    table.data-table tr.highlight-row { background: #fef3c7; font-weight: 600; }
+    
+    /* QA Checklist & AI Log */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .prompt-box {
+      background: #0f172a;
+      color: #38bdf8;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Mini-Lab 3: Data Storytelling & Accessible Table</h1>
+
+    <!-- Insight Panel & Table -->
+    <section class="card">
+      <h2>1. Data Insights & Accessible Table</h2>
+      <aside class="insights-aside">
+        <h3 style="font-size: 15px; color: #1e40af; margin-bottom: 6px;"><i class="fa-solid fa-lightbulb"></i> ข้อสรุปเชิงวิเคราะห์</h3>
+        <ul>
+          <li><b>Peak Period:</b> Q3 ทำยอดขายสูงสุด 1,620,000 บาท (38.1% ของยอดขายทั้งปี)</li>
+          <li><b>Anomaly:</b> ยอดขาย Q4 ลดลงเหลือ 580,000 บาท เนื่องจากระบบชำระเงินขัดข้อง</li>
+        </ul>
+      </aside>
+
+      <table class="data-table">
+        <caption>ตารางสรุปยอดขายรายไตรมาส ปี 2026</caption>
+        <thead>
+          <tr>
+            <th>ไตรมาส</th>
+            <th>ยอดขายรวม (บาท)</th>
+            <th>สัดส่วน (%)</th>
+            <th>สถานะ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Q1 (ม.ค. - มี.ค.)</td>
+            <td>840,000 ฿</td>
+            <td>19.8%</td>
+            <td>ตามเป้าหมาย</td>
+          </tr>
+          <tr>
+            <td>Q2 (เม.ย. - มิ.ย.)</td>
+            <td>1,320,000 ฿</td>
+            <td>31.0%</td>
+            <td>เติบโตต่อเนื่อง</td>
+          </tr>
+          <tr class="highlight-row">
+            <td>Q3 (ก.ค. - ก.ย.) ★ Peak</td>
+            <td>1,620,000 ฿</td>
+            <td>38.1%</td>
+            <td>สูงกว่าเป้าหมาย</td>
+          </tr>
+          <tr>
+            <td>Q4 (ต.ค. - ธ.ค.)</td>
+            <td>580,000 ฿</td>
+            <td>11.1%</td>
+            <td>ต้องปรับปรุง</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- QA Checklist & AI Log -->
+    <section class="card">
+      <h2>2. QA Checklist & AI Prompt Logs</h2>
+      <div class="checklist-item">
+        <i class="fa-solid fa-check" style="color: var(--accent-green);"></i>
+        <span><b>WCAG AA Contrast:</b> ใช้สีฟ้าและส้มที่มีค่าคอนทราสต์ ≥ 4.5:1</span>
+      </div>
+      <div class="checklist-item">
+        <i class="fa-solid fa-check" style="color: var(--accent-green);"></i>
+        <span><b>Data Ethics:</b> แกน Y เริ่มต้นจาก 0 เสมอเพื่อไม่ให้ผู้รับสารเข้าใจผิด</span>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <b style="font-size: 14px;">AI Prompt Log:</b>
+        <div class="prompt-box">
+          "Create an accessible HTML data table for quarterly sales with captions, header scope, and highlight class for Q3 peak."
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
