@@ -1,0 +1,13 @@
+﻿month_no,month,month_th,quarter,revenue_thb,share_pct,is_peak
+1,Jan,ม.ค.,Q1,250000,5.9,false
+2,Feb,ก.พ.,Q1,310000,7.3,false
+3,Mar,มี.ค.,Q1,280000,6.6,false
+4,Apr,เม.ย.,Q2,420000,9.9,false
+5,May,พ.ค.,Q2,390000,9.2,false
+6,Jun,มิ.ย.,Q2,510000,12.0,false
+7,Jul,ก.ค.,Q3,480000,11.3,false
+8,Aug,ส.ค.,Q3,580000,13.6,true
+9,Sep,ก.ย.,Q3,460000,10.8,false
+10,Oct,ต.ค.,Q4,320000,7.5,false
+11,Nov,พ.ย.,Q4,180000,4.2,false
+12,Dec,ธ.ค.,Q4,80000,1.9,false
