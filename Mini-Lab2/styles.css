@@ -1,22 +1,73 @@
+/* ===== Base (Mobile-first) ===== */
 :root{
-  --bg:#0b0b0c; --fg:#eaeaf0; --muted:#b7b8c3; --accent:#7cd3ff; --peak:#ffd166;
+  --bg:#f1f5f9; --surface:#ffffff; --surface-2:#f8fafc;
+  --fg:#0f172a; --muted:#64748b; --border:#e2e8f0;
+  --primary:#2563eb; --primary-dark:#1d4ed8;
+  --peak:#d97706; --peak-text:#b45309; --good:#047857;
+  --font:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg);line-height:1.55}
-.site-header{padding:24px 16px 8px;max-width:1100px;margin:auto}
-.site-header h1{margin:0 0 4px;font-weight:800}
-.subtitle{margin:0;color:var(--muted)}
+body{margin:0;font-family:var(--font);color:var(--fg);background:var(--bg);line-height:1.6}
+a{color:var(--primary)}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+.site-header{background:var(--surface);border-bottom:2px solid var(--border)}
+.site-header .inner{max-width:1100px;margin:auto;padding:24px 16px 16px}
+.site-header h1{margin:0 0 4px;font-size:1.5rem;font-weight:700}
+.subtitle{margin:0;color:var(--muted);font-size:.95rem}
+.lab-badge{display:inline-block;margin-bottom:8px;padding:2px 12px;border-radius:999px;background:#eff6ff;color:var(--primary-dark);border:1px solid #bfdbfe;font-size:.8rem;font-weight:600}
+
+.site-nav{display:flex;flex-wrap:wrap;gap:16px;max-width:1100px;margin:0 auto;padding:10px 16px}
+.site-nav a{text-decoration:none;font-weight:500}
+
 main{max-width:1100px;margin:auto;padding:16px}
-.chart{background:#111;border:1px solid #222;border-radius:14px;padding:16px;margin:12px 0}
-.barchart{width:100%;height:auto}
-.axis{stroke:#3a3b45;stroke-width:2}
-.ticks text{fill:#8c8ea1;font-size:12px}
-.bars rect{fill:var(--accent);rx:6}
-.bars text{fill:#8c8ea1;font-size:12px;text-anchor:middle}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.card > h2{margin:0 0 12px;font-size:1.15rem}
+
+/* KPI cards: column on mobile, row from 768px */
+.kpi-container{display:flex;flex-direction:column;gap:16px;margin-bottom:20px}
+.kpi-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;transition:transform .2s ease}
+.kpi-card:hover{transform:translateY(-2px)}
+.kpi-card.highlight{border-left:4px solid var(--peak);background:#fffbeb}
+.kpi-card h2,.kpi-card h3{margin:0 0 6px;font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi-card .value{margin:0;font-size:1.6rem;font-weight:700}
+.kpi-card.highlight .value{color:var(--peak-text)}
+.kpi-card .sub-text{margin:4px 0 0;font-size:.85rem;font-weight:500;color:var(--good)}
+.kpi-card.highlight .sub-text{color:var(--peak-text)}
+.kpi-card .sub-text.neutral{color:var(--muted)}
+
+.site-footer{max-width:1100px;margin:0 auto;padding:12px 16px 32px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}
+
+@media (min-width:768px){
+  .kpi-container{flex-direction:row}
+  .site-header h1{font-size:1.8rem}
+}
+
+/* ===== SVG Bar Chart ===== */
+.chart-header{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chart-header h2{margin:0;font-size:1.15rem}
+.chip{font-size:.75rem;background:var(--border);color:#334155;padding:4px 10px;border-radius:6px;font-weight:600}
+figure{margin:0}
+svg.bar-chart{display:block;width:100%;height:auto;overflow:visible}
+.bar{fill:var(--primary);transition:fill .2s ease}
+.bar:hover{fill:var(--primary-dark)}
 .bar-peak{fill:var(--peak)}
-.caption{color:var(--muted);margin-top:.5rem}
-.legend text{fill:#c9c9d6;font-size:12px}
-.legend-box{fill:#15161a;stroke:#2a2a33;stroke-width:1}
-.annot-line{stroke:#c9c9d6;stroke-dasharray:4 4}
-.annot-text{fill:#eaeaf0;font-size:13px}
-.site-footer{padding:16px;color:#8c8ea1;text-align:center}
+.bar-peak:hover{fill:var(--peak-text)}
+.axis-line{stroke:#94a3b8;stroke-width:1.5}
+.grid-line{stroke:#e2e8f0;stroke-dasharray:4}
+.axis-label{font-size:11px;fill:var(--muted);font-family:var(--font);text-anchor:middle}
+.axis-label.y{text-anchor:end}
+.value-label{font-size:10px;fill:#334155;font-weight:600;text-anchor:middle;font-family:var(--font)}
+.peak-label{fill:var(--peak-text);font-weight:700}
+.legend{display:flex;gap:16px;margin-top:12px;font-size:.85rem;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--primary)}
+.legend .peak::before{background:var(--peak)}
+figcaption{margin-top:8px;color:var(--muted);font-size:.9rem}
+/* On small screens keep the chart legible and let it scroll sideways */
+.chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:767px){svg.bar-chart{min-width:600px}}
+
+/* ===== Mini-Lab 2 ===== */
+#formula ul{margin:0 0 8px;padding-left:20px}
+#formula p{margin:0;color:var(--muted)}
+code{background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:.9em}

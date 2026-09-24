@@ -1,68 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini‑Lab Class 1 — Semantic Layout</title>
+  <title>Mini-Lab 1 — HTML5 Semantic Layout</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <h1>Retail Dashboard — 2024</h1>
-    <p class="subtitle">Single focus: What month leads and how stable is demand?</p>
+    <div class="inner">
+      <span class="lab-badge">Mini-Lab 1 · HTML5 Semantic & Responsive Layout</span>
+      <h1>E-Commerce Sales Performance Dashboard 2026</h1>
+      <p class="subtitle">รายงานสรุปประสิทธิภาพยอดขายรายเดือน ปี 2026 | ข้อมูลอัปเดต ณ ธันวาคม 2026</p>
+    </div>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#kpis">KPIs</a>
+      <a href="#chart">Chart</a>
+      <a href="#insights">Insights</a>
+    </nav>
   </header>
 
-  <nav class="site-nav" aria-label="Primary">
-    <a href="#kpis">KPIs</a>
-    <a href="#chart">Chart</a>
-    <a href="#insights">Insights</a>
-  </nav>
-
   <main id="main-content">
-    <section id="kpis" class="kpis" aria-label="Key performance indicators">
-      <article class="kpi">
-        <h2>Total Sales</h2>
-        <p class="kpi-value">฿4.2M</p>
-        <p class="kpi-note">Jan–Oct</p>
+    <!-- KPI Cards (Mini-Lab 1) -->
+    <section id="kpis" class="kpi-container" aria-label="Key Performance Indicators">
+      <article class="kpi-card">
+        <h2>ยอดขายรวมทั้งหมด (Total Revenue)</h2>
+        <p class="value">4,260,000 ฿</p>
+        <p class="sub-text">▲ +18.5% YoY</p>
       </article>
-      <article class="kpi">
-        <h2>Best Month</h2>
-        <p class="kpi-value">August</p>
-        <p class="kpi-note">Peak season</p>
+      <article class="kpi-card highlight">
+        <h2>เดือนที่ยอดขายสูงสุด (Peak Month)</h2>
+        <p class="value">580,000 ฿</p>
+        <p class="sub-text">★ เดือนสิงหาคม (Aug)</p>
       </article>
-      <article class="kpi">
-        <h2>MoM Change</h2>
-        <p class="kpi-value">+6.4%</p>
-        <p class="kpi-note">vs last month</p>
+      <article class="kpi-card">
+        <h2>ยอดขายเฉลี่ยรายเดือน (Avg Monthly)</h2>
+        <p class="value">355,000 ฿</p>
+        <p class="sub-text neutral">เป้าหมาย 300,000 ฿/เดือน</p>
       </article>
     </section>
 
-    <section id="chart" class="chart">
-      <h2>Chart Placeholder</h2>
-      <div class="placeholder" role="img" aria-label="Bar chart placeholder for monthly sales">
-        Chart coming next class (SVG)
+    <section id="chart" class="card" aria-labelledby="chart-heading">
+      <h2 id="chart-heading">ยอดขายรายเดือน (Monthly Revenue Trend)</h2>
+      <div class="placeholder" role="img" aria-label="พื้นที่สำหรับกราฟแท่งยอดขายรายเดือน (จะสร้างด้วย SVG ใน Mini-Lab 2)">
+        พื้นที่กราฟ — สร้างด้วย SVG ใน Mini-Lab 2
       </div>
     </section>
 
-    <section id="insights" class="insights">
-      <h2>Key Takeaways</h2>
+    <aside id="insights" class="card insights" aria-labelledby="insights-heading">
+      <h2 id="insights-heading">ข้อความนำเรื่อง (Key Message)</h2>
       <ul>
-        <li>Seasonality: Aug outperforms Q1.</li>
-        <li>Stock buffer +5–8% in Q3.</li>
-        <li>Plan promo during school holidays.</li>
+        <li>ยอดขายสูงสุดในเดือนสิงหาคม (580,000 ฿)</li>
+        <li>ยอดขายเฉลี่ยรายเดือนสูงกว่าเป้าหมาย 300,000 ฿</li>
+        <li>ไตรมาส 4 ยอดขายลดลงชัดเจน — ต้องหาสาเหตุ</li>
       </ul>
-    </section>
+    </aside>
   </main>
 
-  <aside class="note">
-    <p>Note: This page uses HTML5 semantic tags and mobile‑first CSS.</p>
-  </aside>
-
   <footer class="site-footer">
-    <small>© 2025 Mini‑Lab Class 1 • Accessible • Mobile‑first</small>
+    <span>ที่มาข้อมูล: E-Commerce Data Analytics Platform (ข้อมูลตัวอย่างเพื่อการเรียนการสอน)</span>
+    <span>HTML5 Semantic • Mobile-first</span>
   </footer>
 </body>
 </html>
