@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>WardWatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: app shell. Fixed left rail (bottom tabs on phones), sticky top bar, priority-sorted bed grid, right-side patient drawer. */
+:root{
+  --bg:#eef2f3; --surface:#ffffff; --surface-2:#f4f7f8; --sunk:#e5ebed;
+  --ink:#132029; --ink-2:#3b4b56; --muted:#62737e; --line:#d6dee2;
+  --accent:#0b6b77; --accent-ink:#ffffff; --accent-soft:#dcefF1;
+  --crit:#c42b22; --crit-bg:#fce9e7; --crit-line:#efb3ad;
+  --warn:#9a5b00; --warn-fill:#e9a21b; --warn-bg:#fdf2da; --warn-line:#efd08a;
+  --ok:#1d7346; --ok-bg:#e3f2e9; --ok-line:#b5dcc4; --band:rgba(29,115,70,.09);
+  --info:#2f5c9e; --info-bg:#e5edf8;
+  --shadow:0 1px 2px rgba(19,32,41,.06),0 4px 16px rgba(19,32,41,.06);
+  --f-ui:"IBM Plex Sans Thai",system-ui,"Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:10px; --r-sm:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1316; --surface:#131d22; --surface-2:#18242a; --sunk:#0f181c;
+    --ink:#e3ebee; --ink-2:#b8c6cc; --muted:#8a9ca5; --line:#24343b;
+    --accent:#45b8c4; --accent-ink:#06181b; --accent-soft:#12343a;
+    --crit:#ff7366; --crit-bg:#3a1613; --crit-line:#6e2a24;
+    --warn:#f4b942; --warn-fill:#e9a21b; --warn-bg:#31260d; --warn-line:#5f4a17;
+    --ok:#56cf8b; --ok-bg:#0f2d1e; --ok-line:#1d5137; --band:rgba(86,207,139,.10);
+    --info:#8db4f0; --info-bg:#16263d;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1316; --surface:#131d22; --surface-2:#18242a; --sunk:#0f181c;
+  --ink:#e3ebee; --ink-2:#b8c6cc; --muted:#8a9ca5; --line:#24343b;
+  --accent:#45b8c4; --accent-ink:#06181b; --accent-soft:#12343a;
+  --crit:#ff7366; --crit-bg:#3a1613; --crit-line:#6e2a24;
+  --warn:#f4b942; --warn-fill:#e9a21b; --warn-bg:#31260d; --warn-line:#5f4a17;
+  --ok:#56cf8b; --ok-bg:#0f2d1e; --ok-line:#1d5137; --band:rgba(86,207,139,.10);
+  --info:#8db4f0; --info-bg:#16263d;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+[hidden]{display:none!important}
+
+/* demo strip */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:6px 16px;background:var(--ink);color:var(--bg);font-size:13px}
+.demo b{font-weight:600;letter-spacing:.02em}
+.demo .seg{display:flex;gap:2px;background:rgba(127,127,127,.25);border-radius:999px;padding:2px}
+.demo .seg button{border:0;background:transparent;color:inherit;padding:3px 12px;border-radius:999px;font-size:13px}
+.demo .seg button[aria-pressed="true"]{background:var(--bg);color:var(--ink);font-weight:600}
+.demo .sp{flex:1}
+.demo .lnk{border:0;background:none;color:inherit;text-decoration:underline;text-underline-offset:3px;font-size:13px;padding:0}
+
+/* shell */
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:calc(100% - 34px)}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 18px}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.brand-mark svg{width:18px;height:18px}
+.brand b{font-size:16px;letter-spacing:.01em}
+.brand small{display:block;color:var(--muted);font-size:11.5px;line-height:1.2}
+.nav{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;color:var(--ink-2);font-weight:500}
+.nav svg{width:18px;height:18px;flex:none}
+.nav:hover{background:var(--surface-2)}
+.nav[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav .badge{margin-left:auto}
+.rail .grow{flex:1}
+.me{display:flex;gap:10px;align-items:center;padding:10px;border-top:1px solid var(--line);margin-top:8px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;font-weight:600;font-size:13px;color:var(--ink-2);flex:none}
+.me div{min-width:0}
+.me b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me span{font-size:12px;color:var(--muted)}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.top h1{font-size:19px;font-weight:600}
+.top .sub{color:var(--muted);font-size:13px}
+.top .sp{flex:1}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.iconbtn{position:relative;border:1px solid var(--line);background:var(--surface);width:38px;height:38px;border-radius:9px;display:grid;place-items:center}
+.iconbtn svg{width:18px;height:18px}
+.iconbtn .dot{position:absolute;top:-5px;right:-5px}
+.content{padding:20px 24px 40px;display:flex;flex-direction:column;gap:18px}
+
+/* badges, pills */
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--crit);color:#fff;font-size:11.5px;font-weight:600;font-family:var(--f-num)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 7px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;border:1px solid}
+.pill svg{width:13px;height:13px}
+.pill.l0{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
+.pill.l1{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-line)}
+.pill.l2{color:var(--crit);background:var(--crit-bg);border-color:var(--crit-line)}
+.pill.n{color:var(--ink-2);background:var(--surface-2);border-color:var(--line)}
+.pill.i{color:var(--info);background:var(--info-bg);border-color:transparent}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.chip b{font-family:var(--f-num);font-size:10.5px;letter-spacing:.06em;color:var(--muted);font-weight:600}
+
+/* summary */
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr);gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.stat[aria-pressed="true"]{outline:2px solid var(--ink-2);outline-offset:-2px}
+.stat .lab{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.stat .lab svg{width:15px;height:15px}
+.stat .big{font-family:var(--f-num);font-size:30px;font-weight:600;line-height:1.15}
+.stat .hint{font-size:12px;color:var(--muted)}
+.stat.l2 .lab,.stat.l2 .big{color:var(--crit)}
+.stat.l1 .lab,.stat.l1 .big{color:var(--warn)}
+.stat.l0 .lab,.stat.l0 .big{color:var(--ok)}
+.stat.l2.hot{background:var(--crit-bg);border-color:var(--crit-line)}
+.brands{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.brands h3{font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.brands h3 span{color:var(--muted);font-weight:400}
+.brow{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;align-items:center;font-size:12px}
+.brow > span{color:var(--muted)}
+.stack{display:flex;gap:4px;flex-wrap:wrap}
+.stack .chip{font-size:11.5px}
+.stack .chip i{font-style:normal;font-family:var(--f-num);color:var(--ink);font-weight:600}
+
+/* toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg2{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
+.seg2 button{border:0;background:none;padding:5px 11px;border-radius:6px;font-size:13px;color:var(--ink-2);white-space:nowrap}
+.seg2 button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:0 10px;height:36px;min-width:0;flex:1 1 200px;max-width:320px}
+.search svg{width:16px;height:16px;color:var(--muted);flex:none}
+.search input{border:0;background:none;outline:none;width:100%;min-width:0;font-size:14px}
+.toolbar .count{margin-left:auto;font-size:13px;color:var(--muted)}
+
+/* bed grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:12px}
+.bed{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:pointer;text-align:left;overflow:hidden;transition:transform .12s ease,box-shadow .12s ease}
+.bed:hover{transform:translateY(-1px)}
+.bed.sel{outline:2px solid var(--accent);outline-offset:1px}
+.bed-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.bed.l2 .bed-hd{background:var(--crit-bg);border-bottom-color:var(--crit-line)}
+.bed.l1 .bed-hd{background:var(--warn-bg);border-bottom-color:var(--warn-line)}
+.bed.l2{border-color:var(--crit-line)}
+.bed.l1{border-color:var(--warn-line)}
+.bedno{font-family:var(--f-num);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2)}
+.bedno small{font-family:var(--f-ui);font-weight:500;color:var(--muted);letter-spacing:0;margin-left:6px}
+.bed-bd{padding:10px 12px 12px;display:flex;flex-direction:column;gap:9px;flex:1}
+.pt b{font-size:15.5px;font-weight:600;display:block;line-height:1.3}
+.pt span{font-size:12.5px;color:var(--muted)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.m{border-radius:7px;background:var(--surface-2);padding:5px 8px 4px;display:flex;flex-direction:column;border:1px solid transparent}
+.m .ml{font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
+.m .mv{font-family:var(--f-num);font-size:19px;font-weight:600;line-height:1.2;white-space:nowrap}
+.m .mv small{font-size:11px;font-weight:500;color:var(--muted);margin-left:2px}
+.m.l1{background:var(--warn-bg);border-color:var(--warn-line)} .m.l1 .mv{color:var(--warn)}
+.m.l2{background:var(--crit-bg);border-color:var(--crit-line)} .m.l2 .mv{color:var(--crit)}
+.bed-ft{margin-top:auto;font-size:12.5px;border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:3px}
+.bed-ft .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bed-ft .msg{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bed.l2 .bed-ft .msg{color:var(--crit)}
+.bed.l1 .bed-ft .msg{color:var(--warn)}
+.bed-ft .meta{color:var(--muted);white-space:nowrap}
+.bed-ft .state{font-size:12px;color:var(--muted)}
+.bed-ft .state strong{color:var(--crit);font-weight:600}
+.quiet{color:var(--muted)}
+.empty{padding:40px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,18,22,.35);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--bg);border-left:1px solid var(--line);z-index:21;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.15);animation:slide .18s ease-out}
+@keyframes slide{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+.dr-hd{padding:14px 18px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.dr-hd .t{flex:1;min-width:0}
+.dr-hd h2{font-size:18px;font-weight:600}
+.dr-hd .t p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.dr-bd{overflow:auto;padding:16px 18px 32px;display:flex;flex-direction:column;gap:16px}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.sec > h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sec > h3 .chip{font-weight:400}
+.sec > h3 .r{margin-left:auto}
+.vrow{display:grid;grid-template-columns:116px minmax(0,1fr) 88px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.vrow:first-of-type{border-top:0}
+.vrow .vn{font-size:12.5px;color:var(--muted);line-height:1.3}
+.vrow .vn b{display:block;color:var(--ink);font-size:13.5px}
+.vrow .vv{text-align:right;font-family:var(--f-num);font-weight:600;font-size:21px;line-height:1.1}
+.vrow .vv small{display:block;font-size:11px;color:var(--muted);font-weight:500;font-family:var(--f-ui)}
+.vrow.l1 .vv{color:var(--warn)} .vrow.l2 .vv{color:var(--crit)}
+.vrow svg{width:100%;height:44px;display:block}
+.refnote{font-size:12px;color:var(--muted);margin-top:8px}
+.iv{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:center}
+.iv svg{width:72px;height:112px}
+.ivstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ivstats div{background:var(--surface-2);border-radius:7px;padding:6px 9px}
+.ivstats span{display:block;font-size:11.5px;color:var(--muted)}
+.ivstats b{font-family:var(--f-num);font-size:17px;font-weight:600}
+.ivstats .l1 b{color:var(--warn)} .ivstats .l2 b{color:var(--crit)}
+
+/* alert cards */
+.al{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.al + .al{margin-top:10px}
+.al.l2{border-color:var(--crit-line)} .al.l1{border-color:var(--warn-line)}
+.al-hd{display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--surface-2)}
+.al.l2 .al-hd{background:var(--crit-bg)} .al.l1 .al-hd{background:var(--warn-bg)}
+.al-hd .msg{font-weight:600;flex:1;min-width:0}
+.al-hd time{font-size:12px;color:var(--muted);white-space:nowrap}
+.al-bd{padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:12px}
+.steps div{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);border-top:3px solid var(--line)}
+.steps div b{color:var(--ink-2);font-weight:600}
+.steps div.done{border-top-color:var(--ok)}
+.steps div.now{border-top-color:var(--accent);background:var(--accent-soft)}
+.steps div.now b{color:var(--accent)}
+.kv{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+.kv b{color:var(--ink-2);font-weight:500}
+.esc{font-size:12.5px;display:flex;align-items:center;gap:6px;color:var(--muted)}
+.esc strong{font-family:var(--f-num);color:var(--crit)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.btn svg{width:16px;height:16px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--crit);border-color:var(--crit-line);background:var(--surface)}
+.btn.big{padding:11px 18px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{border-color:transparent;background:none}
+textarea,.inp,select.inp{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:14px;outline:none}
+textarea:focus,.inp:focus{border-color:var(--accent)}
+textarea{min-height:64px;resize:vertical}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{border:1px dashed var(--line);background:var(--surface-2);border-radius:999px;padding:2px 10px;font-size:12.5px;color:var(--ink-2)}
+.done-note{font-size:13px;background:var(--ok-bg);border:1px solid var(--ok-line);border-radius:8px;padding:8px 10px}
+.mini{font-size:13px;display:flex;flex-direction:column}
+.mini div{display:grid;grid-template-columns:52px 72px minmax(0,1fr);gap:8px;padding:6px 0;border-top:1px solid var(--line);align-items:baseline}
+.mini div:first-child{border-top:0}
+.mini time{font-family:var(--f-num);font-size:12px;color:var(--muted)}
+.mini span{min-width:0}
+
+/* tables */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-size:12px;font-weight:600;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td .sub{display:block;font-size:12px;color:var(--muted)}
+td.t{font-family:var(--f-num);font-size:12.5px;white-space:nowrap}
+tr.pending td{background:var(--warn-bg)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;padding:14px}
+.filters label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
+.filters select{min-width:180px}
+.filters label.search{flex-direction:row;align-items:center;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.kpi b{display:block;font-family:var(--f-num);font-size:24px;font-weight:600}
+.kpi em{font-style:normal;font-size:12px;color:var(--muted)}
+.banner{display:flex;gap:10px;align-items:flex-start;background:var(--info-bg);color:var(--ink);border-radius:var(--r);padding:10px 14px;font-size:13.5px}
+.banner svg{width:18px;height:18px;flex:none;color:var(--info);margin-top:2px}
+
+/* auth */
+.auth{min-height:calc(100% - 34px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.auth-art{background:var(--ink);color:var(--bg);padding:48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px;position:relative;overflow:hidden}
+.auth-art h1{font-size:30px;font-weight:600;max-width:20ch}
+.auth-art p{color:color-mix(in srgb,var(--bg) 70%,transparent);max-width:46ch}
+.auth-art canvas{position:absolute;left:0;right:0;bottom:0;width:100%;height:46%;opacity:.9}
+.auth-form{display:grid;place-items:center;padding:32px 20px;background:var(--bg)}
+.card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.card h2{font-size:21px;font-weight:600}
+.card p{margin:0;color:var(--muted);font-size:13.5px}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface-2);border-radius:9px;padding:3px}
+.tabs button{border:0;background:none;padding:7px;border-radius:7px;font-weight:600;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.err{color:var(--crit);font-size:13px}
+.wait{display:flex;flex-direction:column;gap:12px}
+.wait ol{margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+
+/* toasts */
+.toasts{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100% - 32px))}
+.toast{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;font-size:13.5px;display:flex;gap:10px;align-items:flex-start;animation:pop .2s ease-out}
+.toast.l2{border-color:var(--crit-line);background:var(--crit-bg)}
+.toast svg{width:18px;height:18px;flex:none;margin-top:2px}
+.toast.l2 svg{color:var(--crit)}
+.toast.ok svg{color:var(--ok)}
+.toast small{display:block;color:var(--muted);font-size:12px}
+@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+/* spec page */
+.spec{display:flex;flex-direction:column;gap:18px;max-width:1100px}
+.spec h2{font-size:17px;font-weight:600;margin-bottom:4px}
+.spec .lead{color:var(--muted);font-size:13.5px;margin:0 0 12px;max-width:72ch}
+.spec section{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.yes{color:var(--ok);font-weight:600}.no{color:var(--muted)}.scope{color:var(--info);font-weight:500}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px}
+.flow > div{flex:1 1 150px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px;position:relative}
+.flow > div b{display:block;font-size:12px;color:var(--accent);font-family:var(--f-num);letter-spacing:.04em}
+.flow-title{font-size:14px;font-weight:600;margin:14px 0 8px}
+.flow-title:first-of-type{margin-top:0}
+.states{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.states div{border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.principles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 22px;font-size:13.5px}
+.principles div b{display:block;font-size:14px}
+.principles div p{margin:2px 0 0;color:var(--ink-2)}
+.assume{font-size:13px;color:var(--ink-2);margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+
+/* phone */
+@media (max-width: 900px){
+  .summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .brands{grid-column:1/-1}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .states{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .principles{grid-template-columns:1fr}
+  .auth{grid-template-columns:1fr}
+  .auth-art{padding:28px 20px 120px}
+  .auth-art h1{font-size:23px}
+}
+@media (max-width: 760px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--line);z-index:15;justify-content:space-around}
+  .rail .brand,.rail .grow,.rail .me{display:none}
+  .nav{flex-direction:column;gap:2px;font-size:11px;padding:6px 8px;position:relative}
+  .nav .badge{position:absolute;top:0;right:4px;margin:0}
+  .content{padding:14px 16px 96px}
+  .top{padding:10px 16px}
+  .top h1{font-size:17px}
+  .summary{gap:8px}
+  .stat{padding:10px}
+  .stat .big{font-size:24px}
+  .stat .hint{display:none}
+  .vrow{grid-template-columns:96px minmax(0,1fr) 74px}
+  .toolbar .count{margin-left:0}
+  .search{max-width:none}
+  .toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="demo" role="region" aria-label="ตัวควบคุมต้นแบบ">
+  <b>ต้นแบบ UX/UI</b>
+  <span>ดูในบทบาท</span>
+  <div class="seg" id="roleSeg">
+    <button id="r-nurse" data-role="nurse">พยาบาล</button>
+    <button id="r-physician" data-role="physician">แพทย์</button>
+    <button id="r-admin" data-role="admin">ผู้ดูแลระบบ</button>
+  </div>
+  <span class="sp"></span>
+  <button class="lnk" id="toSpec">สเปกการออกแบบ</button>
+  <button class="lnk" id="toLogin">หน้าเข้าสู่ระบบ</button>
+</div>
+<div id="root"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ---------- icons ---------- */
+const I = {
+  l0:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="currentColor"/><path d="M5 8.2l2 2 4-4.2" stroke="var(--surface)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  l1:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l7 12.5H1z" fill="currentColor"/><path d="M8 6v3.6M8 11.6v.2" stroke="var(--surface)" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  l2:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.2 1h5.6L15 5.2v5.6L10.8 15H5.2L1 10.8V5.2z" fill="currentColor"/><path d="M8 4.4v4.4M8 11.3v.2" stroke="var(--surface)" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  grid:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5"/></svg>',
+  hist:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 2-4.9"/><path d="M3 3v3.5h3.5M10 6v4l2.5 2"/></svg>',
+  users:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="7" r="3"/><path d="M2.5 17c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><path d="M13 4.2a3 3 0 0 1 0 5.6M15 12.8c1.4.6 2.2 2 2.5 4.2"/></svg>',
+  doc:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 2.5h7l3.5 3.5v11.5H5z"/><path d="M12 2.5V6h3.5M7.5 10h5M7.5 13h5"/></svg>',
+  bell:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 14V9a5 5 0 0 1 10 0v5l1.5 1.5h-13z"/><path d="M8.3 17.5a2 2 0 0 0 3.4 0"/></svg>',
+  search:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="M13.2 13.2L17 17"/></svg>',
+  x:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+  check:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>',
+  up:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>',
+  mail:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 5.5l7 5.5 7-5.5"/></svg>',
+  info:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5M10 6.3v.2"/></svg>',
+  pulse:'<svg viewBox="0 0 20 20" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10.5h4l2-5 3.5 9 2-4h4.5"/></svg>'
+};
+const LV = ['ปกติ','เฝ้าระวัง','วิกฤต'];
+const pill = (l,sm) => `<span class="pill l${l}"${sm?' style="font-size:11px;padding:0 6px"':''}>${I['l'+l]}${LV[l]}</span>`;
+
+/* ---------- thresholds (from the project document, chapter 2) ---------- */
+const TH = {
+  spo2:          {label:'SpO₂', name:'ความอิ่มตัวออกซิเจน', unit:'%', dir:'low',  warn:92,  crit:88, min:78,  max:100, dp:0, cat:'vent'},
+  resp_rate:     {label:'RR',   name:'อัตราการหายใจ',      unit:'ครั้ง/นาที', dir:'high', warn:22, crit:28, min:6, max:40, dp:0, cat:'vent'},
+  tidal_volume:  {label:'Vt',   name:'Tidal volume',      unit:'mL', dir:'low',  warn:380, crit:350, min:280, max:560, dp:0, cat:'vent'},
+  peak_pressure: {label:'PIP',  name:'Peak pressure',     unit:'cmH₂O', dir:'high', warn:30, crit:35, min:10, max:45, dp:0, cat:'vent'},
+  leak:          {label:'Leak', name:'อากาศรั่ว',          unit:'%', dir:'high', warn:15,  crit:25, min:0,   max:40,  dp:0, cat:'vent'},
+  remaining_pct: {label:'IV',   name:'สารน้ำคงเหลือ',      unit:'%', dir:'low',  warn:20,  crit:10, min:0,   max:100, dp:0, cat:'iv'}
+};
+const VENT_P = ['spo2','resp_rate','tidal_volume','peak_pressure','leak'];
+function lvlOf(p,v){const t=TH[p]; if(t.dir==='low'){return v<t.crit?2:v<t.warn?1:0} return v>t.crit?2:v>t.warn?1:0}
+function rangeText(p){const t=TH[p]; return t.dir==='low'?`ปกติ ≥ ${t.warn} · วิกฤต < ${t.crit}`:`ปกติ ≤ ${t.warn} · วิกฤต > ${t.crit}`}
+const ESC = {1:{after:10,to:'หัวหน้าพยาบาล',rcp:'พยาบาลประจำหอ'},2:{after:3,to:'ทีมฉุกเฉิน (Rapid Response)',rcp:'พยาบาลประจำหอ · แพทย์เจ้าของไข้ · อีเมล'}};
+
+/* ---------- seed data (fictional) ---------- */
+const WARDS = {w1:'อายุรกรรมชาย 1',w2:'หอกึ่งวิกฤต (Step-down)',w3:'ศัลยกรรมหญิง 2'};
+const STAFF = [
+  {id:'n1',name:'พว.สุภาวดี แก้วมณี',email:'supawadee.k@wardwatch.example',role:'nurse',ward:'w1',created:'2026-06-02'},
+  {id:'n2',name:'พว.อรอุมา ทองดี',email:'onuma.t@wardwatch.example',role:'nurse',ward:'w1',created:'2026-06-02'},
+  {id:'n3',name:'พว.จิราพร สมบัติ',email:'jiraporn.s@wardwatch.example',role:'nurse',ward:'w2',created:'2026-06-10'},
+  {id:'d1',name:'นพ.ธนกร ศรีสุข',email:'thanakorn.s@wardwatch.example',role:'physician',ward:'w1',created:'2026-06-03'},
+  {id:'d2',name:'พญ.กมลชนก วงศ์ไทย',email:'kamonchanok.w@wardwatch.example',role:'physician',ward:'w2',created:'2026-06-03'},
+  {id:'a1',name:'วีรยุทธ ชัยมงคล',email:'weerayut.c@wardwatch.example',role:'admin',ward:null,created:'2026-05-28'},
+  {id:'u7',name:'ณัฐธิดา พรหมวงศ์',email:'natthida.p@wardwatch.example',role:'nurse',ward:null,created:'2026-09-30',pending:true},
+  {id:'u8',name:'ภาณุวัฒน์ อินทร์แก้ว',email:'panuwat.i@wardwatch.example',role:'nurse',ward:null,created:'2026-10-01',pending:true}
+];
+const P = [
+ {id:'p1',bed:'01',ward:'w1',name:'นายสมชาย ใจดี',age:68,dx:'Pneumonia',type:'both',vent:{brand:'Hamilton C1',mode:'SIMV'},iv:{brand:'B. Braun Infusomat',fluid:'0.9% NSS',vol:1000,rate:80},doc:'d1',base:{spo2:86.5,resp_rate:29,tidal_volume:405,peak_pressure:27,leak:9,fio2:60},rem:42},
+ {id:'p2',bed:'02',ward:'w1',name:'นายประสิทธิ์ บุญมา',age:54,dx:'Post-op bowel resection',type:'iv',iv:{brand:'Terumo TE-171',fluid:'5% D/N/2',vol:1000,rate:100},doc:'d2',rem:11.2},
+ {id:'p3',bed:'03',ward:'w1',name:'นายวิชัย แสงทอง',age:72,dx:'COPD exacerbation',type:'vent',vent:{brand:'Dräger Savina 300',mode:'PSV'},doc:'d1',base:{spo2:91,resp_rate:21,tidal_volume:402,peak_pressure:26,leak:12,fio2:40}},
+ {id:'p4',bed:'04',ward:'w1',name:'นายบุญเลิศ ศรีวงศ์',age:61,dx:'Sepsis, AKI',type:'both',vent:{brand:'Mindray SV300',mode:'PC-AC'},iv:{brand:'Baxter Sigma Spectrum',fluid:'LRS',vol:1000,rate:120},doc:'d1',base:{spo2:95,resp_rate:18,tidal_volume:430,peak_pressure:24,leak:6,fio2:35},rem:63},
+ {id:'p5',bed:'05',ward:'w1',name:'นายเอกชัย พึ่งบุญ',age:47,dx:'DKA',type:'iv',iv:{brand:'B. Braun Infusomat',fluid:'0.9% NSS',vol:1000,rate:150},doc:'d2',rem:18.5},
+ {id:'p6',bed:'06',ward:'w1',name:'นายสุรชัย มั่นคง',age:59,dx:'Stroke, aspiration',type:'vent',vent:{brand:'Puritan Bennett 980',mode:'VC-AC'},doc:'d2',base:{spo2:96,resp_rate:16,tidal_volume:455,peak_pressure:22,leak:4,fio2:30}},
+ {id:'p7',bed:'07',ward:'w1',name:'นายธีระ จันทร์เพ็ญ',age:80,dx:'CHF',type:'both',vent:{brand:'Hamilton C1',mode:'SIMV'},iv:{brand:'Terumo TE-171',fluid:'5% D/W',vol:500,rate:40},doc:'d1',base:{spo2:94,resp_rate:20,tidal_volume:410,peak_pressure:27,leak:17,fio2:45},rem:71},
+ {id:'p8',bed:'08',ward:'w1',name:'นายมานพ รุ่งเรือง',age:66,dx:'UGIB',type:'iv',iv:{brand:'Baxter Sigma Spectrum',fluid:'0.9% NSS',vol:1000,rate:100},doc:'d2',rem:84},
+ {id:'p9',bed:'09',ward:'w1',name:'นายอนันต์ ทองคำ',age:58,dx:'ARDS',type:'vent',vent:{brand:'Mindray SV300',mode:'VC-AC'},doc:'d1',base:{spo2:95,resp_rate:19,tidal_volume:440,peak_pressure:28,leak:5,fio2:50}},
+ {id:'p10',bed:'10',ward:'w1',name:'นายพิชิต สายสุข',age:44,dx:'Dengue, shock',type:'iv',iv:{brand:'Terumo TE-171',fluid:'LRS',vol:1000,rate:200},doc:'d2',rem:55},
+ {id:'p11',bed:'11',ward:'w1',name:'นายสมพงษ์ นาคดี',age:70,dx:'Pneumonia',type:'both',vent:{brand:'Dräger Savina 300',mode:'SIMV'},iv:{brand:'B. Braun Infusomat',fluid:'5% D/N/2',vol:1000,rate:60},doc:'d2',base:{spo2:96,resp_rate:17,tidal_volume:448,peak_pressure:23,leak:7,fio2:35},rem:36},
+ {id:'p12',bed:'12',ward:'w1',name:'นายเกษม ศรีสวัสดิ์',age:63,dx:'Hypokalemia',type:'iv',iv:{brand:'Baxter Sigma Spectrum',fluid:'0.9% NSS + KCl',vol:1000,rate:80},doc:'d1',rem:92},
+ {id:'p13',bed:'S2',ward:'w2',name:'นางสาวลำดวน ศรีทอง',age:39,dx:'Post-op, resp. failure',type:'both',vent:{brand:'Puritan Bennett 980',mode:'PC-AC'},iv:{brand:'Terumo TE-171',fluid:'LRS',vol:1000,rate:100},doc:'d1',base:{spo2:93,resp_rate:23,tidal_volume:395,peak_pressure:29,leak:8,fio2:45},rem:48},
+ {id:'p14',bed:'S5',ward:'w2',name:'นายจำนงค์ ปัญญา',age:75,dx:'Myasthenic crisis',type:'vent',vent:{brand:'Hamilton C1',mode:'SIMV'},doc:'d1',base:{spo2:96,resp_rate:18,tidal_volume:420,peak_pressure:25,leak:6,fio2:35}}
+];
+const SD = {spo2:.7,resp_rate:1,tidal_volume:9,peak_pressure:.9,leak:1.2};
+const NORM = {spo2:96,resp_rate:17,tidal_volume:440,peak_pressure:23,leak:6};
+P.forEach(p=>{
+  p.v={}; p.h={};
+  if(p.base){ for(const k of VENT_P){ let x=p.base[k]; p.h[k]=[]; for(let i=0;i<40;i++){ x+= (p.base[k]-x)*.2 + (Math.random()-.5)*2*SD[k]; p.h[k].push(x);} p.v[k]=x; } p.v.fio2=p.base.fio2; }
+  if(p.iv){ p.ivMl=p.iv.vol*p.rem/100; p.pump='running'; p.h.remaining_pct=[]; for(let i=40;i>0;i--) p.h.remaining_pct.push(Math.min(100,p.rem+p.iv.rate/60*i/p.iv.vol*100)); p.v.remaining_pct=p.rem; }
+});
+P.find(p=>p.id==='p8').pump='occlusion';
+
+const now0 = Date.now();
+const minAgo = m => now0 - m*60000;
+let AID = 1000;
+const ALERTS = [];
+function mkAlert(o){ const a=Object.assign({id:++AID,acked_by:null,acked_at:null,resolved_by:null,resolved_at:null,note:'',escalated:false,escalated_at:null},o); a.after=ESC[a.level].after; a.to=ESC[a.level].to; a.rcp=ESC[a.level].rcp; ALERTS.push(a); return a; }
+// history (resolved)
+[
+ ['p4','spo2',1,'SpO₂ ต่ำ 91%',1380,'n2',3,'n2',14,'ดูดเสมหะ ค่ากลับมา 95%'],
+ ['p2','remaining_pct',1,'สารน้ำเหลือ 19%',1250,'n1',2,'n1',9,'เตรียมถุงใหม่ เปลี่ยนเมื่อหมด'],
+ ['p1','resp_rate',2,'RR สูง 30 ครั้ง/นาที',1100,'n1',1,'d1',12,'ปรับ PS +2 แจ้งแพทย์ ประเมินซ้ำ'],
+ ['p7','leak',1,'Leak สูง 18%',990,'n2',4,'n2',11,'จัดตำแหน่งหน้ากากใหม่'],
+ ['p9','peak_pressure',2,'PIP สูง 37 cmH₂O',870,'n1',1,'d1',20,'ดูดเสมหะ ตรวจท่อหักพับ แพทย์ลด Vt'],
+ ['p10','remaining_pct',2,'สารน้ำเหลือ 8%',720,'n2',2,'n2',6,'เปลี่ยนถุง LRS ใหม่'],
+ ['p3','spo2',1,'SpO₂ ต่ำ 90%',610,'n1',5,'n1',18,'เพิ่ม FiO₂ เป็น 40%'],
+ ['p11','tidal_volume',1,'Vt ต่ำ 374 mL',480,'d2',3,'d2',25,'ปรับ pressure support'],
+ ['p5','remaining_pct',1,'สารน้ำเหลือ 20%',360,'n1',6,'n1',30,'แจ้งเภสัช เตรียม NSS'],
+ ['p13','spo2',2,'SpO₂ ต่ำ 87%',300,'n3',1,'d1',15,'ส่งต่อทีมฉุกเฉิน ใส่ท่อใหม่',true],
+ ['p6','resp_rate',1,'RR สูง 24 ครั้ง/นาที',190,'n2',2,'n2',10,'ประเมินความปวด ให้ยาตามแผน'],
+ ['p4','peak_pressure',1,'PIP สูง 32 cmH₂O',95,'n1',3,'d1',16,'ดูดเสมหะ ฟังเสียงปอด'],
+ ['p12','remaining_pct',1,'สารน้ำเหลือ 18%',62,'n2',4,'n2',7,'เปลี่ยนถุงใหม่']
+].forEach(([pid,param,level,msg,ago,ackBy,ackMin,resBy,resMin,note,esc])=>{
+  const t=minAgo(ago); mkAlert({pid,param,level,msg,cat:TH[param].cat,created:t,acked_by:ackBy,acked_at:t+ackMin*60000,resolved_by:resBy,resolved_at:t+(ackMin+resMin)*60000,note,escalated:!!esc,escalated_at:esc?t+90000:null});
+});
+// open alerts
+mkAlert({pid:'p1',param:'spo2',level:2,msg:'SpO₂ ต่ำ 86%',cat:'vent',created:minAgo(1.6)});
+mkAlert({pid:'p1',param:'resp_rate',level:2,msg:'RR สูง 29 ครั้ง/นาที',cat:'vent',created:minAgo(4.2),acked_by:'n1',acked_at:minAgo(3.5)});
+mkAlert({pid:'p2',param:'remaining_pct',level:1,msg:'สารน้ำเหลือ 11%',cat:'iv',created:minAgo(7.5)});
+mkAlert({pid:'p3',param:'spo2',level:1,msg:'SpO₂ ต่ำ 91%',cat:'vent',created:minAgo(2.4)});
+mkAlert({pid:'p5',param:'remaining_pct',level:1,msg:'สารน้ำเหลือ 18%',cat:'iv',created:minAgo(5.1),acked_by:'n2',acked_at:minAgo(4)});
+mkAlert({pid:'p7',param:'leak',level:1,msg:'Leak สูง 17%',cat:'vent',created:minAgo(.8)});
+mkAlert({pid:'p8',param:'pump',level:2,msg:'ปั๊มแจ้งท่ออุดตัน (Occlusion)',cat:'iv',created:minAgo(.6)});
+mkAlert({pid:'p13',param:'resp_rate',level:1,msg:'RR สูง 23 ครั้ง/นาที',cat:'vent',created:minAgo(3)});
+
+/* ---------- state ---------- */
+const S = {
+  auth:'app', role:'nurse', view:'dashboard', sel:null,
+  f:{level:'all',type:'all',q:'',sort:'priority'},
+  hf:{pid:'all',level:'all',status:'all'},
+  uf:{tab:'all',q:''},
+  login:{tab:'login',err:''},
+  drafts:{}, newUser:null, roleLog:[
+    {t:minAgo(60*24*3),who:'a1',target:'n3',txt:'กำหนดบทบาท พยาบาล · หอกึ่งวิกฤต (Step-down)'},
+    {t:minAgo(60*24*9),who:'a1',target:'d2',txt:'กำหนดบทบาท แพทย์ · หอกึ่งวิกฤต (Step-down)'}
+  ], lastTick:Date.now()
+};
+const ME = {nurse:'n1',physician:'d1',admin:'a1'};
+const staff = id => STAFF.find(s=>s.id===id);
+const meId = () => ME[S.role];
+const ROLE_TH = {nurse:'พยาบาล',physician:'แพทย์',admin:'ผู้ดูแลระบบ'};
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const hhmm = t => { const d=new Date(t); return pad(d.getHours())+':'+pad(d.getMinutes()); };
+const dShort = t => { const d=new Date(t); return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'}); };
+function ago(t){ const s=Math.max(0,Math.round((Date.now()-t)/1000)); if(s<60) return s+' วินาที'; const m=Math.floor(s/60); if(m<60) return m+' นาที'; const h=Math.floor(m/60); if(h<24) return h+' ชม. '+(m%60)+' นาที'; return Math.floor(h/24)+' วัน'; }
+function dur(ms){ const m=Math.round(ms/60000); return m<60? m+' นาที' : Math.floor(m/60)+' ชม. '+(m%60)+' นาที'; }
+function mmss(ms){ const s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+pad(s%60); }
+const initials = n => n.replace(/^(นพ\.|พญ\.|พว\.|นาย|นางสาว|นาง)/,'').trim().slice(0,1);
+
+/* RLS mirror: which patients this role can see */
+function visiblePatients(){
+  if(S.role==='nurse'){ const w=staff(meId()).ward; return P.filter(p=>p.ward===w); }
+  if(S.role==='physician') return P.filter(p=>p.doc===meId());
+  return [];
+}
+const openAlerts = pid => ALERTS.filter(a=>a.pid===pid && !a.resolved_at).sort((a,b)=>b.level-a.level||a.created-b.created);
+function patientLevel(p){
+  let l=0;
+  for(const k in p.v){ if(TH[k]) l=Math.max(l,lvlOf(k,p.v[k])); }
+  if(p.pump==='occlusion') l=2;
+  for(const a of openAlerts(p.id)) l=Math.max(l,a.level);
+  return l;
+}
+
+/* ---------- simulation (stands in for ESP32 + ventilator script → Supabase Realtime) ---------- */
+function tick(){
+  for(const p of P){
+    if(p.base){
+      for(const k of VENT_P){
+        let x=p.v[k]; x += (p.base[k]-x)*.18 + (Math.random()-.5)*2*SD[k];
+        const t=TH[k]; x=Math.min(t.max,Math.max(t.min,x)); p.v[k]=x; p.h[k].push(x); if(p.h[k].length>40) p.h[k].shift();
+      }
+    }
+    if(p.iv){
+      if(p.pump==='running'){ p.ivMl=Math.max(0,p.ivMl - p.iv.rate/60); }
+      p.v.remaining_pct = p.ivMl/p.iv.vol*100;
+      p.h.remaining_pct.push(p.v.remaining_pct); if(p.h.remaining_pct.length>40) p.h.remaining_pct.shift();
+    }
+    // alert logic (mirrors the backend rule: create when a parameter crosses into a worse level)
+    for(const k in p.v){
+      if(!TH[k]) continue;
+      const l=lvlOf(k,p.v[k]); if(!l) continue;
+      const open=ALERTS.find(a=>a.pid===p.id&&a.param===k&&!a.resolved_at);
+      if(open && open.level>=l) continue;
+      const t=TH[k], val=Math.round(p.v[k]);
+      const msg = k==='remaining_pct' ? `สารน้ำเหลือ ${val}%` : `${t.label} ${t.dir==='low'?'ต่ำ':'สูง'} ${val}${t.unit==='%'?'%':' '+t.unit}`;
+      const a=mkAlert({pid:p.id,param:k,level:l,msg,cat:t.cat,created:Date.now()});
+      if(visiblePatients().some(v=>v.id===p.id)) notifyNew(a,p);
+    }
+  }
+  // auto-escalate when nobody acknowledged in time
+  for(const a of ALERTS){
+    if(!a.resolved_at && !a.acked_at && !a.escalated && Date.now()-a.created > a.after*60000){
+      a.escalated=true; a.escalated_at=Date.now(); a.auto=true;
+      const p=P.find(x=>x.id===a.pid);
+      if(visiblePatients().includes(p)) toast(`ส่งต่ออัตโนมัติ · เตียง ${p.bed}`, `ไม่มีผู้รับทราบภายใน ${a.after} นาที ระบบแจ้ง${a.to}แล้ว`, a.level);
+    }
+  }
+  S.lastTick=Date.now();
+  if(S.auth==='app') refreshLive();
+}
+// occasional deterioration so the board stays realistic
+function perturb(){
+  const pool=P.filter(p=>p.base && patientLevel(p)===0); if(!pool.length) return;
+  const p=pool[Math.floor(Math.random()*pool.length)];
+  const k=['spo2','resp_rate','peak_pressure','leak','tidal_volume'][Math.floor(Math.random()*5)];
+  const t=TH[k], tgt = t.dir==='low' ? t.warn-(Math.random()<.35?(t.warn-t.crit)+1.5:1.5) : t.warn+(Math.random()<.35?(t.crit-t.warn)+1.5:1.5);
+  p.base[k]=tgt;
+}
+function notifyNew(a,p){
+  if(a.level===2) toast(`แจ้งเตือนวิกฤต · เตียง ${p.bed} ${p.name}`, `${a.msg} · ส่งอีเมลถึงพยาบาลประจำหอและแพทย์เจ้าของไข้แล้ว`, 2);
+  else if(Date.now()-now0>8000) toast(`เฝ้าระวัง · เตียง ${p.bed}`, a.msg, 1);
+}
+function toast(title,body,kind){
+  const el=document.createElement('div'); el.className='toast '+(kind===2?'l2':kind==='ok'?'ok':'');
+  el.innerHTML=`${kind===2?I.l2:kind===1?I.l1:kind==='mail'?I.mail:I.check}<div><b>${esc(title)}</b><small>${esc(body)}</small></div>`;
+  const box=document.getElementById('toasts'); box.appendChild(el); while(box.children.length>3) box.firstChild.remove();
+  setTimeout(()=>el.remove(),6000);
+}
+
+/* ---------- charts ---------- */
+function spark(p,k,w,h,detail){
+  const t=TH[k], arr=p.h[k]; if(!arr||!arr.length) return '';
+  const pd=4, y=v=>pd+(1-(Math.min(t.max,Math.max(t.min,v))-t.min)/(t.max-t.min))*(h-pd*2), x=i=>i/(arr.length-1)*(w-6)+1;
+  const bandTop = t.dir==='low'? y(t.max):y(t.warn), bandBot = t.dir==='low'? y(t.warn):y(t.min);
+  const d=arr.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join('');
+  const last=arr[arr.length-1], l=lvlOf(k,last), col=l===2?'var(--crit)':l===1?'var(--warn-fill)':'var(--ok)';
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${t.name} ย้อนหลัง">
+    <rect x="0" y="${bandTop}" width="${w}" height="${bandBot-bandTop}" fill="var(--band)"/>
+    ${detail?`<line x1="0" x2="${w}" y1="${y(t.crit)}" y2="${y(t.crit)}" stroke="var(--crit)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity=".7"/>`:''}
+    <path d="${d}" fill="none" stroke="var(--ink-2)" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+    <circle cx="${x(arr.length-1)}" cy="${y(last)}" r="3.2" fill="${col}"/>
+  </svg>`;
+}
+function bag(p){
+  const pct=Math.max(0,Math.min(100,p.v.remaining_pct)), l=lvlOf('remaining_pct',pct);
+  const col=l===2?'var(--crit)':l===1?'var(--warn-fill)':'var(--accent)';
+  const top=14, bot=100, hgt=(bot-top)*pct/100;
+  return `<svg viewBox="0 0 72 112" role="img" aria-label="สารน้ำคงเหลือ ${Math.round(pct)}%">
+    <rect x="30" y="2" width="12" height="8" rx="2" fill="var(--line)"/>
+    <rect x="12" y="10" width="48" height="94" rx="10" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/>
+    <clipPath id="bc"><rect x="13" y="11" width="46" height="92" rx="9"/></clipPath>
+    <rect clip-path="url(#bc)" x="12" y="${bot+3-hgt}" width="48" height="${hgt+2}" fill="${col}" opacity=".85"/>
+    <line x1="12" x2="22" y1="${bot+3-(bot-top)*.2}" y2="${bot+3-(bot-top)*.2}" stroke="var(--warn)" stroke-width="1.5"/>
+    <line x1="12" x2="22" y1="${bot+3-(bot-top)*.1}" y2="${bot+3-(bot-top)*.1}" stroke="var(--crit)" stroke-width="1.5"/>
+    <rect x="33" y="104" width="6" height="8" fill="var(--line)"/>
+  </svg>`;
+}
+
+/* ---------- render: shell ---------- */
+const root=document.getElementById('root');
+function render(){
+  document.querySelectorAll('#roleSeg button').forEach(b=>b.setAttribute('aria-pressed', String(S.auth==='app'&&b.dataset.role===S.role)));
+  if(S.auth!=='app'){ root.innerHTML=renderAuth(); bindAuth(); return; }
+  const unacked = S.role==='admin'?0:visiblePatients().reduce((n,p)=>n+openAlerts(p.id).filter(a=>!a.acked_at).length,0);
+  const pend = STAFF.filter(s=>s.pending).length;
+  const navs = S.role==='admin'
+    ? [['users','จัดการบัญชีผู้ใช้',I.users,pend],['spec','สเปกการออกแบบ',I.doc,0]]
+    : [['dashboard','แดชบอร์ดหอผู้ป่วย',I.grid,unacked],['history','ประวัติการแจ้งเตือน',I.hist,0],['spec','สเปกการออกแบบ',I.doc,0]];
+  const u=staff(meId());
+  root.innerHTML=`<div class="shell">
+    <nav class="rail" aria-label="เมนูหลัก">
+      <div class="brand"><span class="brand-mark">${I.pulse}</span><div><b>WardWatch</b><small>เฝ้าระวังเครื่องช่วยหายใจ<br>และปั๊มสารน้ำ</small></div></div>
+      ${navs.map(([v,l,ic,b])=>`<button class="nav" data-view="${v}" ${S.view===v?'aria-current="page"':''}>${ic}<span>${l}</span>${b?`<span class="badge" id="nb-${v}">${b}</span>`:''}</button>`).join('')}
+      <div class="grow"></div>
+      <div class="me"><span class="avatar">${initials(u.name)}</span><div><b>${esc(u.name)}</b><span>${ROLE_TH[S.role]}${u.ward&&S.role==='nurse'?' · '+WARDS[u.ward]:''}</span></div></div>
+    </nav>
+    <main class="main" id="main">${renderView()}</main>
+  </div>${S.sel?renderDrawer():''}`;
+  bindApp();
+}
+function topbar(title,sub,extra=''){
+  return `<header class="top"><div><h1>${title}</h1><div class="sub">${sub}</div></div><span class="sp"></span>${extra}
+    <span class="live"><i></i><span id="liveTxt">เรียลไทม์ · อัปเดตล่าสุด ${hhmm(S.lastTick)}</span></span></header>`;
+}
+function renderView(){
+  if(S.view==='spec') return renderSpec();
+  if(S.role==='admin') return renderUsers();
+  if(S.view==='history') return renderHistory();
+  return renderDash();
+}
+
+/* ---------- dashboard ---------- */
+function renderDash(){
+  const u=staff(meId());
+  const title = S.role==='nurse' ? 'หอ'+WARDS[u.ward] : 'ผู้ป่วยในความดูแล';
+  const sub = S.role==='nurse' ? 'แสดงทุกเตียงในหอที่คุณสังกัด เรียงตามความเร่งด่วน' : `${esc(u.name)} · แพทย์เจ้าของไข้ · แสดงเฉพาะผู้ป่วยที่คุณดูแล ทุกหอ`;
+  const unacked = visiblePatients().reduce((n,p)=>n+openAlerts(p.id).filter(a=>!a.acked_at).length,0);
+  const bell = `<button class="iconbtn" id="bellBtn" title="แจ้งเตือนที่ยังไม่รับทราบ" aria-label="แจ้งเตือนที่ยังไม่รับทราบ ${unacked} รายการ">${I.bell}<span class="badge dot" id="bellN" ${unacked?'':'hidden'}>${unacked}</span></button>`;
+  return topbar(title,sub,bell)+`<div class="content">
+    <div class="summary" id="summary">${renderSummary()}</div>
+    <div class="toolbar">
+      <div class="seg2" role="group" aria-label="ประเภทอุปกรณ์">
+        ${[['all','ทุกอุปกรณ์'],['vent','เครื่องช่วยหายใจ'],['iv','ปั๊มสารน้ำ'],['both','ใช้ทั้งสอง']].map(([v,l])=>`<button data-ftype="${v}" aria-pressed="${S.f.type===v}">${l}</button>`).join('')}
+      </div>
+      <div class="seg2" role="group" aria-label="การเรียง">
+        <button data-sort="priority" aria-pressed="${S.f.sort==='priority'}">เรียงตามความเร่งด่วน</button>
+        <button data-sort="bed" aria-pressed="${S.f.sort==='bed'}">เรียงตามเตียง</button>
+      </div>
+      <label class="search">${I.search}<input id="q" type="search" placeholder="ค้นหาชื่อผู้ป่วยหรือเลขเตียง" value="${esc(S.f.q)}" aria-label="ค้นหา"></label>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="grid" id="grid">${renderGrid()}</div>
+  </div>`;
+}
+function renderSummary(){
+  const ps=visiblePatients(), c=[0,0,0]; ps.forEach(p=>c[patientLevel(p)]++);
+  const un2 = ps.reduce((n,p)=>n+openAlerts(p.id).filter(a=>!a.acked_at&&a.level===2).length,0);
+  const hints=['อยู่ในเกณฑ์ปกติทุกค่า',`มีค่าเข้าเกณฑ์เฝ้าระวัง`, un2?`${un2} แจ้งเตือนยังไม่มีผู้รับทราบ`:'ทุกแจ้งเตือนมีผู้รับทราบแล้ว'];
+  const tiles=[2,1,0].map(l=>`<button class="stat l${l} ${l===2&&un2?'hot':''}" data-flevel="${l}" aria-pressed="${S.f.level===String(l)}"><span class="lab">${I['l'+l]}${LV[l]}</span><span class="big">${c[l]}</span><span class="hint">${hints[l]}</span></button>`).join('');
+  const vb={}, ib={};
+  ps.forEach(p=>{ if(p.vent) vb[p.vent.brand]=(vb[p.vent.brand]||0)+1; if(p.iv) ib[p.iv.brand]=(ib[p.iv.brand]||0)+1; });
+  const list=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="chip">${esc(k)} <i>${v}</i></span>`).join('')||'<span class="quiet">ไม่มี</span>';
+  return tiles+`<div class="brands"><h3>อุปกรณ์ที่ตรวจพบ <span>${ps.length} ผู้ป่วย · ${Object.keys(vb).length+Object.keys(ib).length} ยี่ห้อ</span></h3>
+    <div class="brow"><span>Ventilator</span><div class="stack">${list(vb)}</div></div>
+    <div class="brow"><span>IV pump</span><div class="stack">${list(ib)}</div></div></div>`;
+}
+function filtered(){
+  let ps=visiblePatients();
+  if(S.f.level!=='all') ps=ps.filter(p=>patientLevel(p)===+S.f.level);
+  if(S.f.type!=='all') ps=ps.filter(p=>p.type===S.f.type);
+  if(S.f.q){ const q=S.f.q.toLowerCase(); ps=ps.filter(p=>p.name.toLowerCase().includes(q)||p.bed.toLowerCase().includes(q)); }
+  if(S.f.sort==='bed') return ps.slice().sort((a,b)=>a.ward.localeCompare(b.ward)||a.bed.localeCompare(b.bed,undefined,{numeric:true}));
+  return ps.slice().sort((a,b)=>{
+    const la=patientLevel(a), lb=patientLevel(b); if(la!==lb) return lb-la;
+    const ua=openAlerts(a.id).some(x=>!x.acked_at), ub=openAlerts(b.id).some(x=>!x.acked_at); if(ua!==ub) return ub-ua;
+    const ta=(openAlerts(a.id)[0]||{}).created||Infinity, tb=(openAlerts(b.id)[0]||{}).created||Infinity; if(ta!==tb) return ta-tb;
+    return a.bed.localeCompare(b.bed,undefined,{numeric:true});
+  });
+}
+function metric(p,k){
+  const t=TH[k], v=p.v[k], l=lvlOf(k,v);
+  return `<div class="m l${l}" title="${t.name} · ${rangeText(k)}"><span class="ml">${t.label}${k==='remaining_pct'?' คงเหลือ':''}</span><span class="mv">${Math.round(v)}<small>${t.unit==='ครั้ง/นาที'?'/นาที':t.unit}</small></span></div>`;
+}
+function renderGrid(){
+  const ps=filtered();
+  const cnt=document.getElementById('count'); if(cnt) cnt.textContent=`แสดง ${ps.length} จาก ${visiblePatients().length} เตียง`;
+  if(!ps.length) return `<div class="empty" style="grid-column:1/-1">ไม่พบผู้ป่วยตามตัวกรองนี้ ลองเลือก “ทุกอุปกรณ์” หรือล้างคำค้นหา</div>`;
+  return ps.map(p=>{
+    const l=patientLevel(p), al=openAlerts(p.id), a=al[0];
+    const chips=[p.vent?`<span class="chip"><b>VENT</b>${esc(p.vent.brand)} · ${p.vent.mode}</span>`:'', p.iv?`<span class="chip"><b>IV</b>${esc(p.iv.brand)}</span>`:''].join('');
+    let ms='';
+    if(p.vent) ms+=['spo2','resp_rate','tidal_volume','peak_pressure'].map(k=>metric(p,k)).join('');
+    if(p.iv) ms+=metric(p,'remaining_pct') + `<div class="m ${p.pump==='occlusion'?'l2':''}"><span class="ml">อัตราไหล</span><span class="mv">${p.pump==='occlusion'?'หยุด':p.iv.rate}<small>${p.pump==='occlusion'?'':'mL/h'}</small></span></div>`;
+    let ft;
+    if(a){
+      const left=a.after*60000-(Date.now()-a.created);
+      const st = a.escalated ? `<span class="pill i">ส่งต่อ${a.auto?'อัตโนมัติ':''}แล้ว</span>` : a.acked_at ? `รับทราบโดย ${esc(staff(a.acked_by).name)} · รอบันทึกการแก้ไข` : `<strong>ยังไม่มีผู้รับทราบ</strong> · ส่งต่ออัตโนมัติใน <span class="num" data-esc="${a.id}">${mmss(left)}</span>`;
+      ft=`<div class="row"><span class="msg">${esc(a.msg)}${al.length>1?` <span class="quiet">+${al.length-1}</span>`:''}</span><span class="meta" data-ago="${a.created}">${ago(a.created)}</span></div><div class="state">${st}</div>`;
+    } else ft=`<div class="row"><span class="quiet">ไม่มีแจ้งเตือนค้าง</span><span class="meta">${p.type==='both'?'2 อุปกรณ์':'1 อุปกรณ์'}</span></div>`;
+    return `<article class="bed l${l} ${S.sel===p.id?'sel':''}" tabindex="0" role="button" data-pid="${p.id}" aria-label="เตียง ${p.bed} ${esc(p.name)} สถานะ${LV[l]}">
+      <div class="bed-hd"><span class="bedno">เตียง ${p.bed}${S.role==='physician'?`<small>${WARDS[p.ward]}</small>`:''}</span>${pill(l)}</div>
+      <div class="bed-bd">
+        <div class="pt"><b>${esc(p.name)}</b><span>${p.age} ปี · ${esc(p.dx)}</span></div>
+        <div class="chips">${chips}</div>
+        <div class="metrics">${ms}</div>
+        <div class="bed-ft">${ft}</div>
+      </div></article>`;
+  }).join('');
+}
+
+/* ---------- patient drawer ---------- */
+function renderDrawer(){
+  const p=P.find(x=>x.id===S.sel); if(!p) return '';
+  const l=patientLevel(p), doc=staff(p.doc);
+  return `<div class="scrim" id="scrim"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="รายละเอียดผู้ป่วย เตียง ${p.bed}">
+    <div class="dr-hd"><div class="t"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bedno">เตียง ${p.bed}</span>${pill(l)}</div>
+      <h2>${esc(p.name)}</h2><p>${p.age} ปี · ${esc(p.dx)} · ${WARDS[p.ward]} · แพทย์เจ้าของไข้ ${esc(doc.name)}</p></div>
+      <button class="iconbtn" id="closeDr" aria-label="ปิด">${I.x}</button></div>
+    <div class="dr-bd">
+      <div id="drAlerts">${renderDrAlerts(p)}</div>
+      <div id="drVitals">${renderDrVitals(p)}</div>
+      <section class="sec"><h3>ประวัติล่าสุดของผู้ป่วยรายนี้<button class="btn ghost r" id="toHist" style="padding:2px 6px;font-size:13px;color:var(--accent)">ดูทั้งหมด</button></h3><div id="drMini">${renderMini(p)}</div></section>
+    </div></aside>`;
+}
+function renderDrVitals(p){
+  let h='';
+  if(p.vent){
+    h+=`<section class="sec"><h3>เครื่องช่วยหายใจ <span class="chip">${esc(p.vent.brand)}</span><span class="chip">Mode ${p.vent.mode}</span><span class="chip">FiO₂ <span class="num">${p.v.fio2}%</span></span></h3>
+      ${VENT_P.map(k=>{const t=TH[k],v=p.v[k],lv=lvlOf(k,v);return `<div class="vrow l${lv}"><div class="vn"><b>${t.label}</b>${t.name}<br>${rangeText(k)}</div>${spark(p,k,240,44,true)}<div class="vv">${Math.round(v)}<small>${t.unit}</small></div></div>`}).join('')}
+      <p class="refnote">แถบสีเขียวในกราฟ = ช่วงค่าปกติ · เส้นประสีแดง = เกณฑ์วิกฤต · อ้างอิง NIH ARDSNet (IBW 60–65 กก.) · ย้อนหลัง 40 ค่าล่าสุด</p></section>`;
+  }
+  if(p.iv){
+    const pct=p.v.remaining_pct, lv=lvlOf('remaining_pct',pct), mins=p.pump==='running'?p.ivMl/p.iv.rate*60:null;
+    const pst = p.pump==='occlusion'?'<span class="pill l2">'+I.l2+'อุดตัน</span>':'<span class="pill l0">'+I.l0+'กำลังให้สารน้ำ</span>';
+    h+=`<section class="sec"><h3>ปั๊มให้สารน้ำ <span class="chip">${esc(p.iv.brand)}</span><span class="r">${pst}</span></h3>
+      <div class="iv">${bag(p)}<div class="ivstats">
+        <div class="l${lv}"><span>คงเหลือ</span><b>${Math.round(pct)}%</b></div>
+        <div><span>ปริมาตร</span><b>${Math.round(p.ivMl)}<small style="font-size:12px;color:var(--muted)"> / ${p.iv.vol} mL</small></b></div>
+        <div class="${p.pump==='occlusion'?'l2':''}"><span>อัตราการไหล</span><b>${p.pump==='occlusion'?'0':p.iv.rate} mL/h</b></div>
+        <div><span>คาดว่าจะหมดใน</span><b>${mins==null?'—':dur(mins*60000)}</b></div>
+        <div style="grid-column:1/-1"><span>ชนิดสารน้ำ</span><b style="font-family:var(--f-ui);font-size:15px">${esc(p.iv.fluid)}</b></div>
+      </div></div>
+      <p class="refnote">วัดจากน้ำหนักถุงด้วย Load cell (HX711) · ${rangeText('remaining_pct')}</p></section>`;
+  }
+  return h;
+}
+const QUICK = {vent:['ดูดเสมหะ','ปรับ FiO₂','จัดท่าผู้ป่วย','ตรวจสายวงจร/หน้ากาก','แจ้งแพทย์'],iv:['เปลี่ยนถุงสารน้ำใหม่','แก้ท่อหักพับ','ตรวจตำแหน่งเข็ม','ปรับอัตราการไหล','แจ้งแพทย์']};
+function renderDrAlerts(p){
+  const al=openAlerts(p.id);
+  if(!al.length) return `<section class="sec"><h3>${I.check} ไม่มีแจ้งเตือนค้างสำหรับผู้ป่วยรายนี้</h3><p class="refnote" style="margin:0">ระบบจะแสดงการแจ้งเตือนที่นี่ทันทีเมื่อค่าใดเข้าเกณฑ์เฝ้าระวังหรือวิกฤต</p></section>`;
+  return `<section class="sec"><h3>แจ้งเตือนที่ต้องดำเนินการ <span class="badge">${al.length}</span></h3>${al.map(a=>{
+    const st = a.acked_at?2:1;
+    const left=a.after*60000-(Date.now()-a.created);
+    const draft=S.drafts[a.id]||'';
+    return `<div class="al l${a.level}">
+      <div class="al-hd">${pill(a.level)}<span class="msg">${esc(a.msg)}</span><time data-ago="${a.created}">${ago(a.created)}</time></div>
+      <div class="al-bd">
+        <div class="steps">
+          <div class="done"><b>แจ้งเตือน</b><span class="num">${hhmm(a.created)}</span></div>
+          <div class="${st===1?'now':'done'}"><b>รับทราบ</b><span>${a.acked_at?esc(staff(a.acked_by).name)+' '+hhmm(a.acked_at):'รอดำเนินการ'}</span></div>
+          <div class="${st===2?'now':''}"><b>บันทึกการแก้ไข</b><span>${st===2?'รอดำเนินการ':'—'}</span></div>
+        </div>
+        <div class="kv"><span>ผู้ได้รับแจ้ง <b>${a.rcp}</b></span>${a.level===2?`<span>${I.mail.replace('<svg','<svg style="width:13px;height:13px;vertical-align:-2px"')} <b>ส่งอีเมลแล้ว</b></span>`:''}</div>
+        ${a.escalated?`<div class="esc"><span class="pill i">ส่งต่อ${a.auto?'อัตโนมัติ':''}แล้ว</span> ถึง${a.to} เวลา ${hhmm(a.escalated_at)}</div>`
+          : !a.acked_at?`<div class="esc">${I.up.replace('<svg','<svg style="width:14px;height:14px"')} หากไม่มีผู้รับทราบ ระบบจะส่งต่อถึง${a.to}ใน <strong data-esc="${a.id}">${mmss(left)}</strong></div>`:''}
+        ${st===1?`<div class="actions"><button class="btn pri big" data-ack="${a.id}">${I.check}รับทราบ</button>${a.escalated?'':`<button class="btn danger" data-escal="${a.id}">${I.up}ส่งต่อทีมฉุกเฉิน</button>`}</div>`
+        :`<label class="field" for="note-${a.id}">สิ่งที่ดำเนินการ (จำเป็นก่อนบันทึก)</label>
+          <div class="quick">${QUICK[a.cat].map(q=>`<button data-quick="${a.id}" data-txt="${q}">${q}</button>`).join('')}</div>
+          <textarea id="note-${a.id}" data-note="${a.id}" placeholder="เช่น ดูดเสมหะแล้ว SpO₂ กลับมา 95%">${esc(draft)}</textarea>
+          <div class="actions"><button class="btn pri" data-resolve="${a.id}" ${draft.trim()?'':'disabled'}>${I.check}บันทึกว่าแก้ไขแล้ว</button>${a.escalated?'':`<button class="btn danger" data-escal="${a.id}">${I.up}ส่งต่อทีมฉุกเฉิน</button>`}</div>`}
+      </div></div>`;}).join('')}</section>`;
+}
+function renderMini(p){
+  const rs=ALERTS.filter(a=>a.pid===p.id&&a.resolved_at).sort((a,b)=>b.created-a.created).slice(0,4);
+  if(!rs.length) return '<p class="refnote" style="margin:0">ยังไม่มีประวัติการแจ้งเตือน</p>';
+  return `<div class="mini">${rs.map(a=>`<div><time>${hhmm(a.created)}</time>${pill(a.level,1)}<span>${esc(a.msg)} → ${esc(a.note)} <span class="quiet">(${esc(staff(a.resolved_by).name)})</span></span></div>`).join('')}</div>`;
+}
+
+/* ---------- history / audit trail ---------- */
+function renderHistory(){
+  const ps=visiblePatients();
+  const scope = S.role==='nurse' ? `ทุกการแจ้งเตือนของหอ${WARDS[staff(meId()).ward]}` : 'เฉพาะผู้ป่วยในความดูแลของคุณ';
+  return topbar('ประวัติการแจ้งเตือนและการแก้ไข',`Audit trail · ${scope} · บันทึกผู้ดำเนินการและเวลาทุกขั้นตอน`)+`<div class="content">
+    <div class="kpis" id="hk"></div>
+    <div class="panel">
+      <div class="filters">
+        <label for="hfP">ผู้ป่วย<select class="inp" id="hfP"><option value="all">ผู้ป่วยทั้งหมด (${ps.length})</option>${ps.map(p=>`<option value="${p.id}" ${S.hf.pid===p.id?'selected':''}>เตียง ${p.bed} · ${esc(p.name)}</option>`).join('')}</select></label>
+        <label for="hfL">ระดับ<select class="inp" id="hfL">${[['all','ทุกระดับ'],['2','วิกฤต'],['1','เฝ้าระวัง']].map(([v,l])=>`<option value="${v}" ${S.hf.level===v?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label for="hfS">สถานะ<select class="inp" id="hfS">${[['all','ทุกสถานะ'],['new','ยังไม่รับทราบ'],['ack','รับทราบแล้ว รอแก้ไข'],['res','แก้ไขแล้ว'],['esc','ถูกส่งต่อ']].map(([v,l])=>`<option value="${v}" ${S.hf.status===v?'selected':''}>${l}</option>`).join('')}</select></label>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>เวลาแจ้ง</th><th>ผู้ป่วย</th><th>การแจ้งเตือน</th><th>ระดับ</th><th>รับทราบ</th><th>แก้ไข / บันทึก</th><th>ส่งต่อ</th></tr></thead><tbody id="hBody"></tbody></table></div>
+    </div></div>`;
+}
+function histRows(){
+  const ids=new Set(visiblePatients().map(p=>p.id));
+  let rs=ALERTS.filter(a=>ids.has(a.pid));
+  if(S.hf.pid!=='all') rs=rs.filter(a=>a.pid===S.hf.pid);
+  if(S.hf.level!=='all') rs=rs.filter(a=>a.level===+S.hf.level);
+  const sf={new:a=>!a.acked_at&&!a.resolved_at,ack:a=>a.acked_at&&!a.resolved_at,res:a=>a.resolved_at,esc:a=>a.escalated}[S.hf.status];
+  if(sf) rs=rs.filter(sf);
+  return rs.sort((a,b)=>b.created-a.created);
+}
+function fillHistory(){
+  const rs=histRows(), body=document.getElementById('hBody'); if(!body) return;
+  const acked=rs.filter(a=>a.acked_at), avg=acked.length?acked.reduce((s,a)=>s+(a.acked_at-a.created),0)/acked.length:0;
+  document.getElementById('hk').innerHTML=`
+    <div class="kpi"><span>การแจ้งเตือน</span><b>${rs.length}</b><em>ตามตัวกรองปัจจุบัน</em></div>
+    <div class="kpi"><span>วิกฤต</span><b style="color:var(--crit)">${rs.filter(a=>a.level===2).length}</b><em>ส่งอีเมลอัตโนมัติ</em></div>
+    <div class="kpi"><span>เวลารับทราบเฉลี่ย</span><b>${acked.length?Math.max(1,Math.round(avg/60000)):'—'}<small style="font-size:13px;color:var(--muted)"> นาที</small></b><em>จากแจ้งเตือนถึงกดรับทราบ</em></div>
+    <div class="kpi"><span>ยังเปิดอยู่</span><b>${rs.filter(a=>!a.resolved_at).length}</b><em>รอรับทราบหรือแก้ไข</em></div>`;
+  body.innerHTML = rs.length? rs.map(a=>{
+    const p=P.find(x=>x.id===a.pid);
+    return `<tr><td class="t">${dShort(a.created)}<span class="sub">${hhmm(a.created)}</span></td>
+      <td><a href="#" data-openp="${p.id}" style="color:var(--accent);font-weight:600;text-decoration:none">เตียง ${p.bed}</a><span class="sub">${esc(p.name)}</span></td>
+      <td>${esc(a.msg)}<span class="sub">${a.cat==='vent'?'เครื่องช่วยหายใจ':'ปั๊มสารน้ำ'}</span></td>
+      <td>${pill(a.level)}</td>
+      <td>${a.acked_at?`${esc(staff(a.acked_by).name)}<span class="sub num">${hhmm(a.acked_at)} · ใช้ ${dur(a.acked_at-a.created)}</span>`:'<span class="pill l2">'+I.l2+'ยังไม่รับทราบ</span>'}</td>
+      <td>${a.resolved_at?`${esc(a.note)}<span class="sub">${esc(staff(a.resolved_by).name)} · <span class="num">${hhmm(a.resolved_at)}</span></span>`:'<span class="quiet">ยังไม่แก้ไข</span>'}</td>
+      <td>${a.escalated?`<span class="pill i">${a.auto?'อัตโนมัติ':'กดส่งต่อ'}</span><span class="sub num">${hhmm(a.escalated_at)}</span>`:'<span class="quiet">—</span>'}</td></tr>`;
+  }).join('') : `<tr><td colspan="7" class="quiet" style="text-align:center;padding:28px">ไม่มีรายการตามตัวกรองนี้</td></tr>`;
+}
+
+/* ---------- admin: users ---------- */
+function renderUsers(){
+  return topbar('จัดการบัญชีผู้ใช้','กำหนดบทบาทและหอผู้ป่วยให้บัญชีที่สมัครใหม่ · บัญชีที่ยังไม่ได้กำหนดจะเข้าถึงข้อมูลใดไม่ได้')+`<div class="content">
+    <div class="banner">${I.info}<div>บทบาทผู้ดูแลระบบเห็นเฉพาะข้อมูลบัญชีผู้ใช้ ไม่เห็นข้อมูลผู้ป่วยหรือค่าทางการแพทย์ (บังคับด้วย Row-Level Security ที่ฐานข้อมูล)</div></div>
+    <div class="kpis" id="uk"></div>
+    <div class="panel">
+      <div class="filters" style="align-items:center">
+        <div class="seg2" role="group" aria-label="กรองบัญชี">${[['all','ทั้งหมด'],['pending','รอกำหนดสิทธิ์'],['nurse','พยาบาล'],['physician','แพทย์'],['admin','ผู้ดูแลระบบ']].map(([v,l])=>`<button data-utab="${v}" aria-pressed="${S.uf.tab===v}">${l}</button>`).join('')}</div>
+        <label class="search" style="margin-left:auto">${I.search}<input id="uq" type="search" placeholder="ค้นหาชื่อหรืออีเมล" value="${esc(S.uf.q)}" aria-label="ค้นหาบัญชี"></label>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>ผู้ใช้</th><th>สมัครเมื่อ</th><th>บทบาท</th><th>หอผู้ป่วยที่สังกัด</th><th>สถานะ</th><th></th></tr></thead><tbody id="uBody"></tbody></table></div>
+    </div>
+    <section class="sec"><h3>บันทึกการเปลี่ยนสิทธิ์ล่าสุด</h3><div class="mini" id="roleLog"></div></section>
+  </div>`;
+}
+function fillUsers(){
+  const body=document.getElementById('uBody'); if(!body) return;
+  const c=k=>STAFF.filter(s=>!s.pending&&s.role===k).length;
+  document.getElementById('uk').innerHTML=`
+    <div class="kpi"><span>บัญชีทั้งหมด</span><b>${STAFF.length}</b><em>${Object.keys(WARDS).length} หอผู้ป่วย</em></div>
+    <div class="kpi" style="${STAFF.some(s=>s.pending)?'background:var(--warn-bg);border-color:var(--warn-line)':''}"><span>รอกำหนดสิทธิ์</span><b style="color:var(--warn)">${STAFF.filter(s=>s.pending).length}</b><em>ยังเข้าถึงข้อมูลไม่ได้</em></div>
+    <div class="kpi"><span>พยาบาล</span><b>${c('nurse')}</b><em>เห็นทุกเตียงในหอที่สังกัด</em></div>
+    <div class="kpi"><span>แพทย์</span><b>${c('physician')}</b><em>เห็นเฉพาะผู้ป่วยในความดูแล</em></div>`;
+  let rs=STAFF.slice();
+  if(S.uf.tab==='pending') rs=rs.filter(s=>s.pending); else if(S.uf.tab!=='all') rs=rs.filter(s=>!s.pending&&s.role===S.uf.tab);
+  if(S.uf.q){ const q=S.uf.q.toLowerCase(); rs=rs.filter(s=>s.name.toLowerCase().includes(q)||s.email.toLowerCase().includes(q)); }
+  rs.sort((a,b)=>(b.pending?1:0)-(a.pending?1:0)||b.created.localeCompare(a.created));
+  body.innerHTML = rs.length? rs.map(s=>`<tr class="${s.pending?'pending':''}" data-row="${s.id}">
+    <td><div style="display:flex;gap:10px;align-items:center"><span class="avatar">${initials(s.name)}</span><div><b style="font-weight:600">${esc(s.name)}</b><span class="sub">${esc(s.email)}</span></div></div></td>
+    <td class="t">${dShort(s.created)}</td>
+    <td><select class="inp" data-urole="${s.id}" aria-label="บทบาทของ ${esc(s.name)}" ${s.id==='a1'?'disabled':''}>${['nurse','physician','admin'].map(r=>`<option value="${r}" ${s.role===r?'selected':''}>${ROLE_TH[r]}${s.pending&&r==='nurse'?' (ค่าเริ่มต้น)':''}</option>`).join('')}</select></td>
+    <td><select class="inp" data-uward="${s.id}" aria-label="หอของ ${esc(s.name)}" ${s.id==='a1'?'disabled':''}><option value="">— ยังไม่กำหนด —</option>${Object.entries(WARDS).map(([k,v])=>`<option value="${k}" ${s.ward===k?'selected':''}>${v}</option>`).join('')}</select></td>
+    <td>${s.pending?'<span class="pill l1">'+I.l1+'รอกำหนดสิทธิ์</span>':'<span class="pill l0">'+I.l0+'ใช้งานได้</span>'}</td>
+    <td><button class="btn ${s.pending?'pri':''}" data-usave="${s.id}" disabled>${s.pending?'อนุมัติ':'บันทึก'}</button></td></tr>`).join('')
+    : `<tr><td colspan="6" class="quiet" style="text-align:center;padding:28px">ไม่พบบัญชีตามตัวกรองนี้</td></tr>`;
+  document.getElementById('roleLog').innerHTML = S.roleLog.slice(0,5).map(r=>`<div><time>${dShort(r.t)}</time><time>${hhmm(r.t)}</time><span><b style="font-weight:600">${esc(staff(r.target).name)}</b> · ${esc(r.txt)} <span class="quiet">โดย ${esc(staff(r.who).name)}</span></span></div>`).join('');
+}
+
+/* ---------- auth ---------- */
+function renderAuth(){
+  if(S.auth==='pending'){
+    const u=S.newUser;
+    return `<div class="auth"><div class="auth-art">${artCopy()}<canvas id="ecg"></canvas></div><div class="auth-form"><div class="card wait">
+      <span class="pill l1" style="align-self:flex-start">${I.l1}รอผู้ดูแลระบบกำหนดสิทธิ์</span>
+      <h2>สมัครสมาชิกสำเร็จ</h2>
+      <p>บัญชี <b>${esc(u.email)}</b> ถูกสร้างแล้ว แต่ยังเข้าถึงข้อมูลผู้ป่วยไม่ได้จนกว่าผู้ดูแลระบบจะกำหนดบทบาทและหอผู้ป่วยให้</p>
+      <ol><li>ผู้ดูแลระบบได้รับคำขอในหน้า “จัดการบัญชีผู้ใช้”</li><li>ผู้ดูแลระบบกำหนดบทบาท (พยาบาลหรือแพทย์) และหอที่สังกัด</li><li>คุณจะได้รับอีเมลแจ้ง แล้วเข้าสู่ระบบได้ตามปกติ</li></ol>
+      <p style="font-size:12.5px">ทดลองต่อ: กด “ผู้ดูแลระบบ” ที่แถบด้านบนเพื่ออนุมัติบัญชีนี้</p>
+      <button class="btn" id="backLogin">กลับไปหน้าเข้าสู่ระบบ</button></div></div></div>`;
+  }
+  const reg=S.login.tab==='register';
+  return `<div class="auth"><div class="auth-art">${artCopy()}<canvas id="ecg"></canvas></div><div class="auth-form"><form class="card" id="authForm" novalidate>
+    <div class="tabs"><button type="button" data-atab="login" aria-pressed="${!reg}">เข้าสู่ระบบ</button><button type="button" data-atab="register" aria-pressed="${reg}">สมัครสมาชิก</button></div>
+    <div><h2>${reg?'สร้างบัญชีบุคลากร':'ยินดีต้อนรับกลับ'}</h2><p>${reg?'บัญชีใหม่ต้องรอผู้ดูแลระบบกำหนดบทบาทและหอผู้ป่วยก่อนจึงจะเห็นข้อมูล':'ใช้อีเมลโรงพยาบาลที่ลงทะเบียนไว้'}</p></div>
+    ${reg?`<label class="field" for="fName">ชื่อ-นามสกุล<input class="inp" id="fName" autocomplete="name" placeholder="เช่น ณัฐธิดา พรหมวงศ์"></label>`:''}
+    <label class="field" for="fEmail">อีเมล<input class="inp" id="fEmail" type="email" autocomplete="email" value="${reg?'':'supawadee.k@wardwatch.example'}" placeholder="name@hospital.go.th"></label>
+    <label class="field" for="fPw">รหัสผ่าน<input class="inp" id="fPw" type="password" autocomplete="${reg?'new-password':'current-password'}" value="${reg?'':'demo-password'}" placeholder="อย่างน้อย 8 ตัวอักษร"></label>
+    ${S.login.err?`<div class="err" role="alert">${esc(S.login.err)}</div>`:''}
+    <button class="btn pri big" type="submit" style="justify-content:center">${reg?'สมัครสมาชิก':'เข้าสู่ระบบ'}</button>
+    ${reg?'':'<p style="font-size:12.5px">บัญชีตัวอย่าง: พยาบาล · แพทย์ใช้ thanakorn.s@… · ผู้ดูแลระบบใช้ weerayut.c@…</p>'}
+  </form></div></div>`;
+}
+const artCopy=()=>`<div style="display:flex;align-items:center;gap:10px;position:relative"><span class="brand-mark">${I.pulse}</span><b style="font-size:17px">WardWatch</b></div>
+  <div style="position:relative"><h1>เห็นทุกเตียงที่ต้องการคุณก่อน ในหน้าจอเดียว</h1><p>เฝ้าระวังเครื่องช่วยหายใจและปั๊มสารน้ำหลายยี่ห้อแบบเรียลไทม์ จัดลำดับผู้ป่วยตามความเร่งด่วน และบันทึกทุกการตอบสนองไว้ตรวจสอบย้อนหลัง</p></div>`;
+function drawEcg(){
+  const c=document.getElementById('ecg'); if(!c) return;
+  const ctx=c.getContext('2d'), dpr=window.devicePixelRatio||1, w=c.clientWidth, h=c.clientHeight; c.width=w*dpr; c.height=h*dpr; ctx.scale(dpr,dpr);
+  const col=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#45b8c4';
+  ctx.strokeStyle=col; ctx.lineWidth=2; ctx.globalAlpha=.85; ctx.beginPath();
+  const mid=h*.55; let x=0; ctx.moveTo(0,mid);
+  while(x<w){ ctx.lineTo(x+40,mid); ctx.lineTo(x+48,mid-8); ctx.lineTo(x+56,mid); ctx.lineTo(x+64,mid+10); ctx.lineTo(x+72,mid-h*.42); ctx.lineTo(x+80,mid+h*.18); ctx.lineTo(x+88,mid); ctx.lineTo(x+110,mid); ctx.lineTo(x+122,mid-14); ctx.lineTo(x+134,mid); x+=150; }
+  ctx.stroke();
+}
+function bindAuth(){
+  drawEcg();
+  root.querySelectorAll('[data-atab]').forEach(b=>b.onclick=()=>{S.login={tab:b.dataset.atab,err:''};render();});
+  const bl=document.getElementById('backLogin'); if(bl) bl.onclick=()=>{S.auth='login';S.login={tab:'login',err:''};render();};
+  const f=document.getElementById('authForm'); if(!f) return;
+  f.onsubmit=e=>{
+    e.preventDefault();
+    const em=document.getElementById('fEmail').value.trim().toLowerCase(), pw=document.getElementById('fPw').value;
+    if(S.login.tab==='register'){
+      const nm=(document.getElementById('fName').value||'').trim();
+      if(!nm||!/^\S+@\S+\.\S+$/.test(em)) { S.login.err='กรอกชื่อและอีเมลให้ถูกต้อง'; return render(); }
+      if(pw.length<8){ S.login.err='รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'; return render(); }
+      if(STAFF.some(s=>s.email===em)){ S.login.err='อีเมลนี้มีบัญชีอยู่แล้ว ลองเข้าสู่ระบบแทน'; return render(); }
+      const u={id:'u'+(STAFF.length+1),name:nm,email:em,role:'nurse',ward:null,created:new Date().toISOString().slice(0,10),pending:true};
+      STAFF.push(u); S.newUser=u; S.auth='pending'; return render();
+    }
+    const u=STAFF.find(s=>s.email===em);
+    if(!u){ S.login.err='ไม่พบบัญชีนี้ ตรวจสอบอีเมลหรือสมัครสมาชิกก่อน'; return render(); }
+    if(u.pending){ S.newUser=u; S.auth='pending'; return render(); }
+    ME[u.role]=u.id; S.role=u.role; S.auth='app'; S.view=u.role==='admin'?'users':'dashboard'; S.sel=null; render();
+  };
+}
+
+/* ---------- spec ---------- */
+function renderSpec(){
+  const Y='<span class="yes">✓</span>', N='<span class="no">—</span>', sc=t=>`<span class="scope">${t}</span>`;
+  const rows=[
+    ['เข้าสู่ระบบ / สมัครสมาชิกด้วยอีเมลและรหัสผ่าน',Y,Y,Y],
+    ['แดชบอร์ดภาพรวม จัดลำดับ ปกติ / เฝ้าระวัง / วิกฤต',sc('ทุกเตียงในหอที่สังกัด'),sc('เฉพาะผู้ป่วยในความดูแล (ทุกหอ)'),N],
+    ['สรุปยี่ห้ออุปกรณ์ที่ตรวจพบ',Y,Y,N],
+    ['รายละเอียดผู้ป่วยตามอุปกรณ์ที่ใช้จริง พร้อมช่วงค่าปกติ',Y,Y,N],
+    ['รับทราบ (Acknowledge) → บันทึกการแก้ไข (Resolve)',Y,Y,N],
+    ['ส่งต่อทีมฉุกเฉินได้ทันที ไม่ต้องรับทราบก่อน',Y,Y,N],
+    ['อีเมลแจ้งเตือนเคสวิกฤต',sc('ผู้ป่วยในหอที่สังกัด'),sc('ผู้ป่วยในความดูแล'),N],
+    ['ประวัติการแจ้งเตือน (Audit trail) กรองรายผู้ป่วย',sc('ทั้งหอ'),sc('ผู้ป่วยในความดูแล'),N],
+    ['จัดการบัญชี กำหนดบทบาทและหอผู้ป่วย',N,N,Y],
+    ['เห็นข้อมูลทางการแพทย์',Y,Y,sc('ไม่เห็น')]
+  ];
+  const thr=Object.entries(TH).map(([k,t])=>`<tr><td><b>${t.label}</b><span class="sub">${t.name}</span></td><td>${t.unit}</td><td>${t.dir==='low'?'≥ '+t.warn:'≤ '+t.warn}</td><td style="color:var(--warn)">${t.dir==='low'?`${t.crit} – ${t.warn-1}`:`${t.warn+1} – ${t.crit}`}</td><td style="color:var(--crit)">${t.dir==='low'?'< '+t.crit:'> '+t.crit}</td></tr>`).join('');
+  return topbar('สเปกการออกแบบ UX/UI','สิทธิ์ตามบทบาท · ลำดับการใช้งาน · วงจรการแจ้งเตือน · เกณฑ์ค่า · หลักการออกแบบ')+`<div class="content"><div class="spec">
+    <section><h2>ผู้ใช้ 3 บทบาทและสิทธิ์</h2><p class="lead">หน้าจอแสดงเฉพาะสิ่งที่บทบาทนั้นทำได้ ปุ่มที่ไม่มีสิทธิ์จะไม่ถูกแสดงเลย (ไม่ใช่แค่กดไม่ได้) และฐานข้อมูลบังคับสิทธิ์ซ้ำด้วย Row-Level Security</p>
+      <div class="tablewrap"><table><thead><tr><th>ความสามารถ</th><th>พยาบาล</th><th>แพทย์เจ้าของไข้</th><th>ผู้ดูแลระบบ</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>
+    <section><h2>ลำดับการใช้งานหลัก</h2><p class="lead">แต่ละขั้นคือหนึ่งหน้าจอหรือหนึ่งการกระทำ ลำดับนี้ทดลองได้จริงในต้นแบบ</p>
+      <div class="flow-title">พยาบาล: ตอบสนองต่อเคสวิกฤต</div>
+      <div class="flow"><div><b>1</b>อีเมลวิกฤตและป้ายตัวเลขที่ระฆังแจ้งเข้ามา</div><div><b>2</b>การ์ดเตียงสีแดงขึ้นมาอยู่บนสุดของแดชบอร์ดเอง</div><div><b>3</b>แตะการ์ดเพื่อเปิดแผงรายละเอียด เห็นค่าและช่วงปกติ</div><div><b>4</b>กด “รับทราบ” ครั้งเดียว ตัวนับเวลาส่งต่อหยุดทันที</div><div><b>5</b>ดูแลผู้ป่วย แล้วเลือกข้อความด่วนหรือพิมพ์บันทึก</div><div><b>6</b>“บันทึกว่าแก้ไขแล้ว” การ์ดกลับเป็นสีตามค่าจริง และเข้า Audit trail</div></div>
+      <div class="flow-title">แพทย์: ทบทวนผู้ป่วยของตนเอง</div>
+      <div class="flow"><div><b>1</b>เข้าสู่ระบบ เห็นเฉพาะผู้ป่วยที่ตนเป็นแพทย์เจ้าของไข้ จากทุกหอ</div><div><b>2</b>เปิดรายละเอียด ดูแนวโน้มค่าทั้ง 5 ของเครื่องช่วยหายใจ</div><div><b>3</b>รับทราบ / บันทึก / ส่งต่อ ได้เหมือนพยาบาล</div><div><b>4</b>เปิดประวัติ กรองตามชื่อผู้ป่วยเพื่อดูสิ่งที่ทำไปแล้ว</div></div>
+      <div class="flow-title">บัญชีใหม่และผู้ดูแลระบบ</div>
+      <div class="flow"><div><b>1</b>บุคลากรสมัครด้วยอีเมล ได้บทบาทเริ่มต้น “พยาบาล” แต่ยังไม่มีหอ</div><div><b>2</b>หน้ารอสิทธิ์อธิบายว่าต้องรออะไรและจะรู้ได้อย่างไร</div><div><b>3</b>ผู้ดูแลระบบเห็นแถวสีเหลือง “รอกำหนดสิทธิ์” อยู่บนสุด</div><div><b>4</b>เลือกบทบาทและหอ กด “อนุมัติ” แล้วระบบแจ้งผู้ใช้ทางอีเมล</div></div>
+    </section>
+    <section><h2>วงจรการแจ้งเตือน</h2><p class="lead">สองขั้นตอนตามขอบเขตโครงงาน การส่งต่อทำได้ทุกเวลา และระบบส่งต่ออัตโนมัติเมื่อไม่มีผู้รับทราบในเวลาที่กำหนด</p>
+      <div class="states">
+        <div><span class="pill l2">${I.l2}แจ้งเตือนใหม่</span>ค่าเข้าเกณฑ์ ระบบสร้างรายการ แจ้งผู้รับผิดชอบ และส่งอีเมลเฉพาะระดับวิกฤต</div>
+        <div><span class="pill n">รับทราบแล้ว</span>บันทึกชื่อผู้กดและเวลา หยุดตัวนับเวลาส่งต่อ</div>
+        <div><span class="pill l0">${I.l0}แก้ไขแล้ว</span>ต้องมีข้อความสิ่งที่ทำ บันทึกชื่อและเวลา ปิดรายการ</div>
+        <div><span class="pill i">ส่งต่อ</span>กดเองได้ทุกขั้น หรืออัตโนมัติ: วิกฤต 3 นาที → ทีมฉุกเฉิน, เฝ้าระวัง 10 นาที → หัวหน้าพยาบาล</div>
+      </div></section>
+    <section><h2>เกณฑ์ค่าที่ใช้กำหนดสี</h2><p class="lead">ค่าเครื่องช่วยหายใจอ้างอิง NIH ARDSNet ตามเอกสารโครงงาน (ผู้ป่วยทั่วไป IBW 60–65 กก.) สถานะของผู้ป่วยคือระดับที่แย่ที่สุดในทุกค่า</p>
+      <div class="tablewrap"><table><thead><tr><th>ค่า</th><th>หน่วย</th><th>ปกติ</th><th>เฝ้าระวัง</th><th>วิกฤต</th></tr></thead><tbody>${thr}<tr><td><b>Pump</b><span class="sub">สถานะปั๊ม</span></td><td>—</td><td>กำลังให้</td><td>—</td><td style="color:var(--crit)">อุดตัน / หยุด</td></tr></tbody></table></div></section>
+    <section><h2>หลักการออกแบบ</h2><div class="principles">
+      <div><b>สถานะต้องอ่านได้โดยไม่พึ่งสีอย่างเดียว</b><p>ทุกระดับมีสี รูปทรงไอคอน (วงกลม สามเหลี่ยม แปดเหลี่ยม) และคำกำกับ รองรับผู้ที่มองเห็นสีบกพร่องและการมองจากระยะไกล</p></div>
+      <div><b>สิ่งที่เร่งด่วนลอยขึ้นมาเอง</b><p>เรียงตามระดับ → มีแจ้งเตือนที่ยังไม่รับทราบ → เกิดก่อน พยาบาลไม่ต้องไล่หาเตียง ยังสลับเรียงตามเลขเตียงได้เมื่อตรวจเยี่ยม</p></div>
+      <div><b>แสดงเฉพาะอุปกรณ์ที่ผู้ป่วยใช้จริง</b><p>ผู้ป่วยที่ใช้เฉพาะปั๊มจะไม่มีช่องว่างของเครื่องช่วยหายใจ การ์ดจึงสั้นและอ่านเร็ว</p></div>
+      <div><b>ตัวเลขใหญ่ ฟอนต์ความกว้างเท่ากัน</b><p>ค่าใช้ฟอนต์ monospace ตัวเลขไม่กระโดดเมื่ออัปเดตทุก 2 วินาที และมีหน่วยกำกับทุกค่า</p></div>
+      <div><b>รับทราบได้ในหนึ่งครั้ง</b><p>ปุ่มรับทราบใหญ่ที่สุดในแผง หน้าจออัปเดตทันทีโดยไม่รอฐานข้อมูลตอบกลับ ลดความรู้สึกหน่วง</p></div>
+      <div><b>เวลาที่เหลือก่อนส่งต่อมองเห็นเสมอ</b><p>ตัวนับถอยหลังบนการ์ดและในแผงทำให้ทั้งหอรู้ว่าเคสไหนยังไม่มีใครดูแล</p></div>
+      <div><b>บันทึกเร็วด้วยข้อความด่วน</b><p>ข้อความที่ใช้บ่อยตามประเภทอุปกรณ์ แตะเพื่อเติม แล้วแก้ไขต่อได้ ลดการพิมพ์บนแท็บเล็ต</p></div>
+      <div><b>ผู้ดูแลระบบเห็นเท่าที่จำเป็น</b><p>เมนูของผู้ดูแลระบบไม่มีหน้าผู้ป่วยเลย สอดคล้องกับหลักให้สิทธิ์น้อยที่สุด</p></div>
+      <div><b>โหมดมืดสำหรับเวรดึก</b><p>สีทุกค่าออกแบบให้ใช้ได้ทั้งโหมดสว่างและมืด ลดแสงจ้าในหอผู้ป่วยตอนกลางคืน</p></div>
+      <div><b>ใช้ได้ทั้งจอใหญ่ แท็บเล็ต และมือถือ</b><p>บนมือถือ เมนูย้ายไปด้านล่าง และแผงรายละเอียดเต็มจอ</p></div>
+    </div></section>
+    <section><h2>สมมติฐานในต้นแบบ</h2><ul class="assume">
+      <li>เกณฑ์สารน้ำคงเหลือ (เฝ้าระวัง ≤ 20%, วิกฤต < 10%) และเวลาส่งต่ออัตโนมัติ (3 / 10 นาที) เป็นค่าตั้งต้นสำหรับต้นแบบ ปรับได้ในตาราง alerts (escalate_after_min)</li>
+      <li>เอกสารกำหนด enum บทบาทไว้ 7 แบบ ต้นแบบนี้ออกแบบเฉพาะ 3 บทบาทตามที่ร้องขอ (nurse, physician, admin)</li>
+      <li>ค่าในหน้าจอเป็นข้อมูลจำลอง (random walk) แทนข้อมูลจาก ESP32 และสคริปต์จำลองเครื่องช่วยหายใจ อัปเดตทุก 2 วินาที เวลาให้สารน้ำเร่ง 1 นาทีต่อการอัปเดต</li>
+      <li>ชื่อผู้ป่วย บุคลากร และอีเมลทั้งหมดเป็นข้อมูลสมมติ</li>
+    </ul></section>
+  </div></div>`;
+}
+
+/* ---------- live refresh (no full re-render, so typing and focus survive) ---------- */
+function refreshLive(){
+  const lt=document.getElementById('liveTxt'); if(lt) lt.textContent='เรียลไทม์ · อัปเดตล่าสุด '+hhmm(S.lastTick)+':'+pad(new Date(S.lastTick).getSeconds());
+  const g=document.getElementById('grid'); if(g){ g.innerHTML=renderGrid(); document.getElementById('summary').innerHTML=renderSummary(); bindGrid(); }
+  if(S.role!=='admin'){
+    const un=visiblePatients().reduce((n,p)=>n+openAlerts(p.id).filter(a=>!a.acked_at).length,0);
+    const bn=document.getElementById('bellN'); if(bn){ bn.textContent=un; bn.hidden=!un; }
+    const nb=document.getElementById('nb-dashboard'); if(nb){ nb.textContent=un; nb.hidden=!un; }
+  }
+  if(S.sel){
+    const p=P.find(x=>x.id===S.sel), dv=document.getElementById('drVitals'); if(dv) dv.innerHTML=renderDrVitals(p);
+    const da=document.getElementById('drAlerts');
+    if(da){ const sig=openAlerts(p.id).map(a=>a.id+':'+(a.acked_at?1:0)+(a.escalated?1:0)).join(','); if(da.dataset.sig!==sig){ const f=document.activeElement&&document.activeElement.dataset.note; da.innerHTML=renderDrAlerts(p); da.dataset.sig=sig; bindDrawer(); if(f){const t=document.getElementById('note-'+f); if(t){t.focus(); t.setSelectionRange(t.value.length,t.value.length);}} } }
+  }
+  document.querySelectorAll('[data-ago]').forEach(e=>e.textContent=ago(+e.dataset.ago));
+  document.querySelectorAll('[data-esc]').forEach(e=>{const a=ALERTS.find(x=>x.id===+e.dataset.esc); if(a) e.textContent=mmss(a.after*60000-(Date.now()-a.created));});
+  if(document.getElementById('hBody') && !document.activeElement.closest?.('.filters')) fillHistory();
+}
+
+/* ---------- actions ---------- */
+function ack(id){ const a=ALERTS.find(x=>x.id===id); if(!a||a.acked_at) return; a.acked_at=Date.now(); a.acked_by=meId(); toast('รับทราบแล้ว', `${a.msg} · บันทึกชื่อและเวลาแล้ว`, 'ok'); rerenderDrawerAndGrid(); }
+function escalate(id){ const a=ALERTS.find(x=>x.id===id); if(!a||a.escalated) return; a.escalated=true; a.escalated_at=Date.now(); a.to='ทีมฉุกเฉิน (Rapid Response)'; const p=P.find(x=>x.id===a.pid); toast(`ส่งต่อทีมฉุกเฉินแล้ว · เตียง ${p.bed}`, 'ทีม Rapid Response เห็นเคสนี้ในแดชบอร์ดของทีมแล้ว', 'ok'); rerenderDrawerAndGrid(); }
+function resolve(id){
+  const a=ALERTS.find(x=>x.id===id), note=(S.drafts[id]||'').trim(); if(!a||!note) return;
+  if(!a.acked_at){a.acked_at=Date.now(); a.acked_by=meId();}
+  a.resolved_at=Date.now(); a.resolved_by=meId(); a.note=note; delete S.drafts[id];
+  const p=P.find(x=>x.id===a.pid);
+  // simulate the intervention working
+  if(VENT_P.includes(a.param)&&p.base) p.base[a.param]=NORM[a.param];
+  if(a.param==='remaining_pct'){ p.ivMl=p.iv.vol; p.v.remaining_pct=100; }
+  if(a.param==='pump'){ p.pump='running'; }
+  toast('บันทึกการแก้ไขแล้ว', `เตียง ${p.bed} · ${note}`, 'ok'); rerenderDrawerAndGrid();
+}
+function rerenderDrawerAndGrid(){
+  const p=P.find(x=>x.id===S.sel), da=document.getElementById('drAlerts');
+  if(da&&p){ da.innerHTML=renderDrAlerts(p); da.dataset.sig=''; }
+  const mini=document.getElementById('drMini'); if(mini&&p) mini.innerHTML=renderMini(p);
+  refreshLive(); bindDrawer();
+}
+
+/* ---------- binding ---------- */
+function bindGrid(){
+  root.querySelectorAll('.bed').forEach(el=>{
+    el.onclick=()=>openPatient(el.dataset.pid);
+    el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openPatient(el.dataset.pid);} };
+  });
+  root.querySelectorAll('[data-flevel]').forEach(b=>b.onclick=()=>{ S.f.level = S.f.level===b.dataset.flevel?'all':b.dataset.flevel; refreshLive(); });
+}
+function openPatient(id){ S.sel=id; render(); const c=document.getElementById('closeDr'); if(c) c.focus(); }
+function closeDrawer(){ const id=S.sel; S.sel=null; render(); const el=root.querySelector(`.bed[data-pid="${id}"]`); if(el) el.focus(); }
+function bindDrawer(){
+  root.querySelectorAll('[data-ack]').forEach(b=>b.onclick=()=>ack(+b.dataset.ack));
+  root.querySelectorAll('[data-escal]').forEach(b=>b.onclick=()=>escalate(+b.dataset.escal));
+  root.querySelectorAll('[data-resolve]').forEach(b=>b.onclick=()=>resolve(+b.dataset.resolve));
+  root.querySelectorAll('[data-note]').forEach(t=>t.oninput=()=>{ S.drafts[t.dataset.note]=t.value; const b=root.querySelector(`[data-resolve="${t.dataset.note}"]`); if(b) b.disabled=!t.value.trim(); });
+  root.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{ const id=b.dataset.quick, t=document.getElementById('note-'+id); const cur=(t.value||'').trim(); t.value = cur? cur+(cur.endsWith(' ')?'':' ')+b.dataset.txt : b.dataset.txt; t.dispatchEvent(new Event('input')); t.focus(); });
+}
+function bindApp(){
+  root.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{ S.view=b.dataset.view; S.sel=null; render(); window.scrollTo(0,0); });
+  bindGrid();
+  root.querySelectorAll('[data-ftype]').forEach(b=>b.onclick=()=>{ S.f.type=b.dataset.ftype; root.querySelectorAll('[data-ftype]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); refreshLive(); });
+  root.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{ S.f.sort=b.dataset.sort; root.querySelectorAll('[data-sort]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); refreshLive(); });
+  const q=document.getElementById('q'); if(q) q.oninput=()=>{ S.f.q=q.value; refreshLive(); };
+  const bell=document.getElementById('bellBtn'); if(bell) bell.onclick=()=>{ S.f.level='all'; S.f.sort='priority'; const first=filtered().find(p=>openAlerts(p.id).some(a=>!a.acked_at)); if(first) openPatient(first.id); else toast('ไม่มีแจ้งเตือนค้าง','ทุกแจ้งเตือนมีผู้รับทราบแล้ว','ok'); };
+  if(S.sel){
+    document.getElementById('closeDr').onclick=closeDrawer; document.getElementById('scrim').onclick=closeDrawer;
+    const th=document.getElementById('toHist'); if(th) th.onclick=()=>{ S.hf={pid:S.sel,level:'all',status:'all'}; S.view='history'; S.sel=null; render(); };
+    const da=document.getElementById('drAlerts'); da.dataset.sig=openAlerts(S.sel).map(a=>a.id+':'+(a.acked_at?1:0)+(a.escalated?1:0)).join(',');
+    bindDrawer();
+  }
+  // history
+  if(document.getElementById('hBody')){
+    fillHistory();
+    [['hfP','pid'],['hfL','level'],['hfS','status']].forEach(([id,k])=>{ const el=document.getElementById(id); el.onchange=()=>{ S.hf[k]=el.value; fillHistory(); }; });
+    document.getElementById('hBody').onclick=e=>{ const a=e.target.closest('[data-openp]'); if(a){ e.preventDefault(); S.view='dashboard'; openPatient(a.dataset.openp); } };
+  }
+  // users
+  if(document.getElementById('uBody')){
+    fillUsers(); bindUsers();
+    root.querySelectorAll('[data-utab]').forEach(b=>b.onclick=()=>{ S.uf.tab=b.dataset.utab; root.querySelectorAll('[data-utab]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); fillUsers(); bindUsers(); });
+    const uq=document.getElementById('uq'); uq.oninput=()=>{ S.uf.q=uq.value; fillUsers(); bindUsers(); };
+  }
+}
+function bindUsers(){
+  const chk=id=>{ const s=staff(id), r=root.querySelector(`[data-urole="${id}"]`).value, w=root.querySelector(`[data-uward="${id}"]`).value, b=root.querySelector(`[data-usave="${id}"]`);
+    const needWard = r!=='admin';
+    b.disabled = (needWard && !w) || (!s.pending && r===s.role && (w||null)===s.ward);
+    b.title = needWard && !w ? 'เลือกหอผู้ป่วยก่อน' : ''; };
+  root.querySelectorAll('[data-urole],[data-uward]').forEach(el=>el.onchange=()=>chk(el.dataset.urole||el.dataset.uward));
+  root.querySelectorAll('[data-usave]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.usave, s=staff(id), r=root.querySelector(`[data-urole="${id}"]`).value, w=root.querySelector(`[data-uward="${id}"]`).value||null;
+    const was=s.pending; s.role=r; s.ward=r==='admin'?null:w; s.pending=false;
+    S.roleLog.unshift({t:Date.now(),who:'a1',target:id,txt:`กำหนดบทบาท ${ROLE_TH[r]}${s.ward?' · '+WARDS[s.ward]:''}`});
+    toast(was?`อนุมัติ ${s.name} แล้ว`:`บันทึกสิทธิ์ของ ${s.name} แล้ว`, `${ROLE_TH[r]}${s.ward?' · '+WARDS[s.ward]:''} · ส่งอีเมลแจ้งผู้ใช้แล้ว`, 'ok');
+    render();
+  });
+}
+
+/* ---------- global controls ---------- */
+document.querySelectorAll('#roleSeg button').forEach(b=>b.onclick=()=>{
+  S.role=b.dataset.role; S.auth='app'; S.sel=null; ME.nurse='n1'; ME.physician='d1';
+  S.view = S.role==='admin' ? (S.view==='spec'?'spec':'users') : (S.view==='users'?'dashboard':S.view);
+  S.hf={pid:'all',level:'all',status:'all'}; render();
+});
+document.getElementById('toSpec').onclick=()=>{ if(S.auth!=='app'){S.auth='app';} S.view='spec'; S.sel=null; render(); window.scrollTo(0,0); };
+document.getElementById('toLogin').onclick=()=>{ S.auth='login'; S.login={tab:'login',err:''}; S.sel=null; render(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&S.sel) closeDrawer(); });
+window.addEventListener('resize',()=>{ if(S.auth!=='app') drawEcg(); });
+
+render();
+setInterval(tick,2000);
+setInterval(perturb,20000);
+</script>
+</body>
+</html>
